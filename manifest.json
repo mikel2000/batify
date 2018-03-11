@@ -1,0 +1,60 @@
+{
+  "manifest_version": 2,
+
+  "name": "BATify",
+  "description": "__MSG_extensionDescription__",
+  "icons": { "16": "skin/batify_16.png",
+             "32": "skin/batify_32.png",
+             "48": "skin/batify_48.png",
+             "128": "skin/batify_128.png" },
+  "version": "0.9.13",
+  "default_locale": "en",
+  "homepage_url": "https://www.batify.net/",
+  "author": "Michael Volz",
+
+  "browser_action": {
+    "default_icon": { "16": "skin/batify_16.png",
+                      "32": "skin/batify_32.png",
+                      "48": "skin/batify_48.png",
+                      "128": "skin/batify_128.png" },
+    "default_title": "BATify",
+    "default_popup": "popup.html"
+  },
+
+  "background": {
+    "scripts":
+    [
+       "js/lib/underscore.js",
+       "js/lib/niceware.js",
+       "js/lib/anonize2-jumbo.js",
+       "js/lib/anonize2-wrapper.js",
+       "js/lib/nacl.js",
+       "js/lib/crypto.js",
+       "js/lib/storagedb.js",
+       "js/background.js"
+    ]
+  },
+
+  "content_scripts":
+  [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["js/content.js"],
+      "all_frames": false
+    }
+  ],
+
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self';",
+  "permissions":
+  [
+     "tabs",
+     "webNavigation",
+     "notifications",
+     "downloads",
+     "https://*.basicattentiontoken.org/*",
+     "https://api.coinmarketcap.com/*",
+     "https://api.fixer.io/*",
+     "storage",
+     "unlimitedStorage"
+  ]
+}

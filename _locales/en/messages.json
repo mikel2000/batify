@@ -1,0 +1,157 @@
+{
+  "extensionDescription": {"message": "Support the sites you like"},
+
+  "status": {"message": "Status"},
+  "teaser1":
+  {
+     "message": "BATify brings BAT and site contributions to $BROWSER$ users.",
+     "placeholders": {"browser": {"content" : "$1"}}
+  },
+  "desc1": {"message": "To start using BATify, simply flip the switch at the top of this window."},
+  "desc2": {"message": "BATify is not affiliated with or sponsored by Brave Software in any way. Brave has made their software open-source, thus allowing for the creation of BATify. The contributions you make will still flow through Brave's anonymized ledger system."},
+  "desc3":
+  {
+     "message": "Batify is currently in Beta. Your $FEEDBACK$ is much appreciated and helps optimizing it further.",
+     "placeholders": {"feedback": {"content" : "$1"}}
+  },
+  "desc4":
+  {
+     "message": "Need more info? Please visit $BATIFYNET$.",
+     "placeholders": {"batifynet": {"content" : "$1"}}
+  },
+  "feedback": {"message": "feedback"},
+  "tos": {"message": "Terms of Service"},
+  "autoinclude": {"message": "Autoinclude"},
+  "help": {"message": "Help"},
+  "history": {"message": "Contribution History"},
+  "settings": {"message": "Advanced Settings"},
+  "budget": {"message": "Biweekly budget"},
+  "balance": {"message": "Account balance"},
+  "addFunds": {"message": "Add funds"},
+  "lastContribution": {"message": "Last contribution"},
+  "lastContributionNever": {"message": "Never"},
+  "nextContribution": {"message": "Next contribution"},
+  "walletSettingUp": {"message": "Setting up wallet..."},
+  "walletReady": {"message": "Your wallet is ready!"},
+  "walletNotCreated": {"message": "No wallet created"},
+  "balanceTooLow": {"message": "Your account balance is under your budget for this month. Please add funds."},
+  "calculated": {"message": "Calculated"},
+  "filter": {"message": "Filter"},
+  "hideDeleted": {"message": "Hide deleted sites"},
+  "hideExcluded": {"message": "Hide excluded sites"},
+  "headerSite": {"message": "Site"},
+  "headerInclude": {"message": "Include"},
+  "headerVisits": {"message": "Visits"},
+  "headerTimeSpent": {"message": "Time Spent"},
+  "headerActions": {"message": "Actions"},
+  "verified": {"message": "Verified Publisher"},
+  "pin": {"message": "Pin"},
+  "unpin": {"message": "Unpin"},
+  "delete": {"message": "Delete"},
+  "restore": {"message": "Restore"},
+  "paymentStatusNotChanged": {"message": "Payment status couldn't be changed."},
+  "autoincludeNotChanged": {"message": "Autoinclude couldn't be changed."},
+  "hideExcludedNotChanged": {"message": "Hide excluded couldn't be changed."},
+  "hideDeletedNotChanged": {"message": "Hide deleted couldn't be changed."},
+  "budgetNotChanged": {"message": "Budget couldn't be changed."},
+  "includedNotChanged": {"message": "Included status couldn't be changed."},
+  "siteNotDeleted": {"message": "Site couldn't be deleted."},
+  "siteNotRestored": {"message": "Site couldn't be restored."},
+  "pinStatusNotChanged": {"message": "Pin status couldn't be changed."},
+  "pinShareNotChanged": {"message": "Pin share couldn't be changed."},
+  "minViewDurationNotChanged": {"message": "Minimum view duration couldn't be changed."},
+  "minViewsNotChanged": {"message": "Minimum views couldn't be changed."},
+  "passphraseNotDisplayed": {"message": "Passphrase couldn't be displayed."},
+  "passphraseNotCopied": {"message": "Passphrase couldn't be copied."},
+  "walletRecovered": {"message": "Your wallet was successfully recovered."},
+  "walletNotRecovered": {"message": "Unfortunately, your wallet couldn't be recovered."},
+  "currencyNotChanged": {"message": "Budget currency couldn't be changed."},
+  "logLevelNotChanged": {"message": "Log level couldn't be changed."},
+  "addressNotDisplayed": {"message": "Address couldn't be displayed."},
+  "addressNotCopied": {"message": "Address couldn't be copied."},
+  "historyNotDisplayed": {"message": "Contribution history couldn't be displayed."},
+  "historyDetailsNotDisplayed": {"message": "Contribution history details couldn't be displayed."},
+  "recoveryFileTitle": {"message": "BATify Wallet Recovery Passphrase"},
+  "recoveryFileNote": {"message": "Note: This passphrase is not stored on any servers. This passphrase is your only method of recovering your BATify wallet. Save this passphrase in a safe place, separate from your BATifyed browser. Make sure you keep this passphrase private or else your wallet can be compromised."},
+  "recoveryFilePassphrase": {"message": "Passphrase"},
+  "close": {"message": "Close"},
+  "pinShareInvalidNumber": {"message": "Please enter a valid number without decimals between 0 and 100."},
+  "pinShareSumTooLarge": {"message": "The sum of all pinned shares would be larger than 100. Please choose a smaller share."},
+
+  "messageTitle": {"message": "Message"},
+
+  "historyTitle": {"message": "Contribution History"},
+  "historyNotContributed": {"message": "You didn't contribute until now."},
+  "historyDetails": {"message": "Details"},
+  "historyHeaderDate": {"message": "Date"},
+  "historyHeaderTotal": {"message": "Total Amount"},
+
+  "historyDetailsTitle": {"message": "Contribution History Details"},
+  "historyDetailsDate": {"message": "Date"},
+  "historyDetailsAmount": {"message": "Amount"},
+  "historyDetailsHeaderRank": {"message": "Rank"},
+  "historyDetailsHeaderSite": {"message": "Site"},
+
+  "settingsTitle": {"message": "Advanced Settings"},
+  "settingsMinViewDuration": {"message": "Minimum page time before logging a visit"},
+  "settingsSeconds": {"message": "seconds"},
+  "settingsMinViews": {"message": "Minimum visits for publisher relevancy"},
+  "settingsVisit": {"message": "visit"},
+  "settingsVisits": {"message": "visits"},
+  "settingsCurrency": {"message": "Budget currency"},
+  "settingsLogLevel": {"message": "Log Level"},
+  "settingsBackup": {"message": "Backup Wallet"},
+  "settingsRecovery": {"message": "Recover Wallet"},
+
+  "backupTitle": {"message": "Wallet Backup"},
+  "backupDesc1": {"message": "Below you will find the passphrase that is required if you ever loose access to this computer."},
+  "backupDesc2": {"message": "Make sure you keep the passphrase private or else your wallet can be compromised."},
+  "backupPassphrase": {"message": "Your passphrase"},
+  "backupCopy": {"message": "Copy Passphrase"},
+  "backupSave": {"message": "Save Recovery File"},
+
+  "recoveryTitle": {"message": "Wallet Recovery"},
+  "recoveryDesc1": {"message": "Please enter your recovery passphrase below."},
+  "recoveryDesc2": {"message": "After recovery your current wallet will be discarded and will be replaced by the wallet you used when you created the recovery passphrase."},
+  "recoveryPassphrase": {"message": "Your passphrase"},
+  "recoveryRecover": {"message": "Recover"},
+
+  "fundsTitle": {"message": "Add funds to your Wallet"},
+  "fundsDesc1": {"message": "It's easy to add funds to your BAT wallet."},
+  "fundsDesc2": {"message": "Just select one of the currencies below to begin a new transfer."},
+  "fundsHint1":
+  {
+     "message": "Currently the BAT wallet is unidirectional. BAT flows to the publisher sites and can not be retrieved or refunded. For more information please visit $BATIFYNET$.",
+     "placeholders": {"batifynet": {"content" : "$1"}}
+  },
+  "fundsLearnMore": {"message": "Learn more"},
+  "fundsUphold":
+  {
+     "message": "All transactions are processed by $UPHOLD$. You can also use Uphold to easily fund your BAT wallet. $UPHOLD_BRAVE$.",
+     "placeholders": {"uphold": {"content" : "$1"}, "uphold_brave": {"content" : "$2"}}
+  },
+
+  "fundsCurrencyTitle": {"message": "Add funds to your Wallet"},
+  "fundsCurrencyDesc1":
+  {
+     "message": "Go to your external $CURRENCY_NAME$ wallet and send $CURRENCY_SYMBOL$ to your BAT wallet address below.",
+     "placeholders": {"currency_name": {"content" : "$1"}, "currency_symbol": {"content" : "$2"}}
+  },
+  "fundsCurrencyHint1":
+  {
+     "message": "We recommend transferring enough $CURRENCY_SYMBOL$ to cover your first contribution of $AMOUNT$. Your $CURRENCY_SYMBOL$ will be converted to BAT and appears in your wallet within minutes.",
+     "placeholders": {"currency_symbol": {"content" : "$1"}, "amount": {"content" : "$2"}}
+  },
+
+  "notificationBackupWallet": {"message": "We strongly recommend to store the recovery passphrase before you add any funds to your BAT wallet. Please click on the gear button and on 'Backup Wallet'."},
+  "notificationSiteRestored": {"message": "As soon as you revisited the restored site, it will be displayed again in the visits list."},
+  "notificationContributionFailed":
+  {
+     "message": "Processing of your contribution failed $ERROR_COUNT$ times. Please contact batifyext@gmail.com to check the problem. Thanks!",
+     "placeholders": {"error_count": {"content" : "$1"}}
+  },
+  "notificationContributionSucceeded": {"message": "Contribution was successfully executed. Thanks!"},
+  "notificationFundsNotSufficient": {"message": "Your funds are not sufficient to execute the contribution. Please add some funds."},
+  "notificationFundsWillNotSufficient": {"message": "Your funds won't be sufficient to execute the next contribution. Please add some funds."},
+  "notificationContributionAdvance": {"message": "The next contribution will take place in about 2 days. Perhaps you like to check included and pinned websites before."}
+}

@@ -1,0 +1,469 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<title>BATify - Support the sites you like</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="icon" href="skin/batify_32.png" type="image/png">
+<script type="text/javascript" src="js/index.js"></script>
+<link rel="stylesheet" type="text/css" href="css/checkbox.css" />
+<style type="text/css">
+body, a{
+   color:#F8F8F8;
+}
+
+#payment_on input, #payment_on select{
+   background-color:#A0A0A0;
+   border-color:rgba(258, 258, 258, 0.5);
+   color:#F8F8F8;
+}
+
+a:hover{
+   text-decoration:none;
+}
+
+tr.second{
+   background-color:lightgoldenrodyellow;
+}
+
+table#history_contributions td, table#history_details_contribution_details td {
+   border:1px solid lightgrey;
+}
+
+table#views td{
+   border:1px solid rgba(258, 258, 258, 0.3);
+}
+
+table#views tr:first-child td{
+ border-top-color:rgba(258, 258, 258, 0.8);
+}
+
+table#views tr:last-child td{
+ border-bottom-color:rgba(258, 258, 258, 0.8);
+}
+
+table#views td:first-child{
+ border-left-color:rgba(258, 258, 258, 0.8);
+}
+
+table#views td:last-child{
+ border-right-color:rgba(258, 258, 258, 0.8);
+}
+
+table#views .second {
+   background-color:#A9A9A9;
+}
+
+.box {
+   border-color:rgba(248, 248, 248, 0.8);
+   border-style:solid;
+}
+
+.site {
+   text-decoration: none;
+   color: #F8F8F8;
+}
+
+.site:hover {
+   text-decoration: underline;
+}
+
+.deleted {
+   text-decoration: line-through;
+   color: lightgrey;
+}
+
+.ellipsis {
+   text-overflow: ellipsis;
+   display: block;
+   overflow: hidden;
+}
+
+.button {
+   background-color:#f7ba2a;
+   border:none;
+   color:white;
+   padding:10px 32px;
+   text-align:center;
+   text-decoration:none;
+   display:inline-block;
+   font-size:100%;
+   border-radius:10px;
+}
+
+.pin{
+   background-repeat:no-repeat;
+   width:20px;
+   height:20px;
+   margin-left:10px;
+   margin-right:10px;
+   display:inline-block;
+}
+
+.pin_inactive{
+   background-image:url('skin/pin_inactive.png');
+}
+
+.pin_active{
+   background-image:url('skin/pin_active.png');
+}
+
+.trash{
+   background-image:url('skin/trash.png');
+   background-repeat:no-repeat;
+   width:20px;
+   height:20px;
+   display:inline-block;
+}
+
+.restore{
+   background-image:url('skin/restore.png');
+   background-repeat:no-repeat;
+   width:20px;
+   height:20px;
+   display:inline-block;
+}
+
+.magnifier{
+   background-image:url('skin/magnifier.png');
+   background-repeat:no-repeat;
+   width:20px;
+   height:20px;
+   display:inline-block;
+}
+
+.verified{
+   background-image:url('skin/verified.png');
+   background-repeat:no-repeat;
+   width:15px;
+   height:15px;
+   display:inline-block;
+   vertical-align:middle;
+}
+
+.currency{
+   width:50px;
+   padding:15px 20px 15px 20px;
+   background-color:rgba(211,211,211,0.3);
+   border:1px solid grey;
+   border-radius:10px;
+}
+
+.modal{
+   display: none;
+   position: fixed;
+   z-index: 1;
+   padding-top: 50px;
+   left: 0;
+   top: 0;
+   width: 100%;
+   height: 100%;
+   overflow: auto;
+   background-color: rgba(0,0,0,0.3);
+   color: black;
+}
+
+.modal-content{
+   position: relative;
+   background-color: #fefefe;
+   margin: auto;
+   border: 1px solid #888;
+   width: 80%;
+   text-align: left;
+}
+
+.close{
+   color: #aaaaaa;
+   font-size: 28px;
+   font-weight: bold;
+   position: absolute;
+   top: 5px;
+   left: 95%;
+}
+
+.close:hover,
+.close:focus{
+   color: #000;
+   text-decoration: none;
+   cursor: pointer;
+}
+
+.dialog_header{
+   font-size:120%;
+   padding:15px 20px 15px 20px;
+   background:#E8E8E8;
+   border-radius:10px 10px 0px 0px;
+}
+
+.dialog_footer{
+   font-size:110%;
+   padding:15px 20px 15px 20px;
+   background:#E8E8E8;
+   text-align:center;
+   border-radius:0px 0px 10px 10px;
+}
+
+#history_details_contribution_details a{
+   color:black;
+}
+
+#funds_hint_1 a, #funds_hint_2 a{
+   color:black;
+}
+
+#funds_currency_hint_1 a, #funds_currency_hint_2 a{
+   color:black;
+}
+
+::placeholder{
+   color: lightgrey;
+   opacity: 1;
+}
+</style>
+</head>
+<body style="font-family:arial; font-size:12pt; background-color:#A0A0A0;">
+<center>
+<div id="payment_off" style="display:none;">
+   <table cellspacing="0px" cellpadding="5px" style="width:700px; margin-top:15px; margin-bottom:30px;">
+   <tr>
+      <td style="width:30%; padding:10px 0px 12px 0px; vertical-align:bottom;"><img src="skin/batify_48.png" style="width:40px; margin-bottom:-3px; padding:10px 10px 10px 10px; background-color:#f7ba2a; border-radius:5px; vertical-align:bottom;"/><span style="margin-left:20px; font-size:150%; font-weight:bold;">BATify</span> <span style="font-weight:normal; font-size:80%;">Beta</span></td>
+      <td style="width:30%; text-align:center; padding:10px 0px 10px 0px; vertical-align:bottom;"><span id="payment_status_off_label" style="margin-right:5px; vertical-align:top;"></span><span style="vertical-align:middle;"><label class="el-switch el-switch-sm"><input type="checkbox" id="payment_status_off"><span class="el-switch-style"></span></label></span></td>
+      <td style="width:25%; padding:10px 0px 10px 0px;"></td>
+      <td style="width:15%; padding:10px 0px 10px 0px;"></td>
+   </tr>
+   <tr>
+      <td colspan="4" class="box" style="border-width:1px; border-radius:10px; padding:15px; line-height:1.2em;"><span id="teaser_1" style="font-weight:bold;"></span><br><br><span id="desc_1"></span><br><br><span id="desc_2"></span> <a id="tos" href="https://basicattentiontoken.org/contributor-terms-of-service/" target="_blank"></a>.<br><br><span id="desc_3"></span><br><br><span id="desc_4"></span></td>
+   </tr>
+   <tr><td colspan="4" style="height:10px;"></td></tr>
+   </table>
+</div>
+<div id="payment_on" style="display:none;">
+   <table cellspacing="0px" cellpadding="0px" style="width:700px; margin-top:15px; margin-bottom:30px;">
+   <tr>
+      <td style="width:30%; padding:10px 0px 12px 0px; vertical-align:bottom;"><img src="skin/batify_48.png" style="width:40px; margin-bottom:-3px; padding:10px 10px 10px 10px; background-color:#f7ba2a; border-radius:5px; vertical-align:bottom;"/><span style="margin-left:20px; font-size:150%; font-weight:bold;">BATify</span> <span style="font-weight:normal; font-size:80%;">Beta</span></td>
+      <td style="width:20%; text-align:center; padding:10px 0px 15px 0px; vertical-align:bottom;"><span id="payment_status_on_label" style="margin-right:5px; vertical-align:middle;"></span><label class="el-switch el-switch-yellow el-switch-sm" style="vertical-align:middle;"><input type="checkbox" id="payment_status_on"><span class="el-switch-style"></span></label></td>
+      <td style="text-align:center; padding:10px 0px 15px 0px; vertical-align:bottom;"><span id="autoinclude_label" style="margin-right:5px; vertical-align:middle;"></span><label class="el-switch el-switch-yellow el-switch-sm" style="vertical-align:middle;"><input type="checkbox" id="auto_include"><span class="el-switch-style"></span></label></td>
+      <td style="width:80px; text-align:right; padding-bottom:10px; vertical-align:bottom; white-space:nowrap;"><a id="help" href="https://community.batify.net" target="_blank" style="vertical-align:middle;"><img src="skin/help.png" style="margin-right:3px;"/></a><a id="history" href="#" style="vertical-align:middle;"><img src="skin/history.png" style="height:23px; margin-right:7px;"/></a><a id="settings" href="#" style="vertical-align:middle;"><img src="skin/preferences.png" style="height:23px;"/></a></td>
+   </tr>
+   <tr>
+      <td class="box" style="width:33%; padding:15px; border-width:1px 0px 0px 1px; border-radius:10px 0px 0px 0px;"><span id="budget_label"></span><br>
+         <select id="budget" style="font-size:100%; width:190px;">
+            <option value="1"></option>
+            <option value="2"></option>
+            <option value="3"></option>
+            <option value="4"></option>
+            <option value="5"></option>
+            <option value="10"></option>
+            <option value="15"></option>
+            <option value="20"></option>
+            <option value="25"></option>
+            <option value="30"></option>
+            <option value="35"></option>
+            <option value="40"></option>
+            <option value="45"></option>
+            <option value="50"></option>
+	     </select>
+      </td>
+      <td class="box" style="width:33%; padding:15px; border-width:1px 0px 0px 0px;"><span id="balance_label"></span><br><input id="wallet_balance" disabled="true" style="font-size:100%; width:190px;"></input></td>
+      <td colspan="2" class="box" style="width:33%; text-align:center; vertical-align:bottom; padding:15px; border-width:1px 1px 0px 0px; border-radius:0px 10px 0px 0px;"><a id="funds" href="#" class="button"></a></td>
+   </tr>
+   <tr>
+      <td class="box" style="padding:0px 15px 15px 15px; border-width:0px 0px 1px 1px;"><span id="contribution_last_label"></span><br><span id="contribution_last"></span></td>
+      <td class="box" style="padding:0px 15px 15px 15px; border-width:0px 0px 1px 0px;"><span id="contribution_next_label"></span><br><span id="contribution_next"></span></td>
+      <td class="box" id="wallet_status" colspan="2" style="text-align:center; vertical-align:top; padding:0px 15px 15px 15px; border-width:0px 1px 1px 0px;"></td>
+   </tr>
+   <tr>
+      <td colspan="4" style="padding-top:5px; font-size:90%;">* <span id="calculated"></span></td>
+   </tr>
+   <tr>
+      <td style="padding:15px 0px 10px 0px;"><input id="views_filter" style="width:150px; font-size:100%;" /></td>
+      <td colspan="1" style="text-align:right; padding:15px 0px 10px 0px;"><span id="hide_deleted_label" style="margin-right:5px; vertical-align:middle;"></span><label class="el-switch el-switch-yellow el-switch-sm" style="vertical-align:middle;"><input type="checkbox" id="hide_deleted"><span class="el-switch-style"></span></label></td>
+      <td colspan="2" style="text-align:right; padding:15px 0px 10px 0px;"><span id="hide_excluded_label" style="margin-right:5px; vertical-align:middle;"></span><label class="el-switch el-switch-yellow el-switch-sm" style="vertical-align:middle;"><input type="checkbox" id="hide_excluded"><span class="el-switch-style"></span></label></td></tr>
+   <tr>
+      <td colspan="4">
+         <table id="views" cellspacing="0px" cellpadding="5px" style="width:100%; border-collapse: collapse; background-color:#A0A0A0;">
+         <tr style="font-weight:bold; color:rgba(248, 248, 248, 0.9);">
+            <td style="width:20px;"></td><td id="header_site" style="width:350px; text-align:left;"></td><td id="header_include" style="text-align:center;"></td><td id="header_visits" style="text-align:center;"></td><td id="header_time_spent" style="text-align:center; white-space:nowrap;"></td><td style="width:30px; text-align:center;">%</td><td id="header_actions" style="text-align:center;"></td>
+         </tr>
+         </table>
+      </td>
+   </tr>
+   </table>
+   </div>
+</div>
+<div id="settings_dialog" class="modal">
+   <div class="modal-content" style="width:600px; border-radius:10px;">
+      <div id="settings_title" class="dialog_header"></div>
+      <div style="padding:20px;">
+         <table style="margin:0px auto;">
+         <tr>
+            <td id="settings_min_view_duration_label" style="padding-right:5px; vertical-align:middle;"></td>
+            <td>
+               <select id="settings_min_view_duration" style="margin-top:5px; font-size:100%; width:110px;">
+                  <option value="5"></option>
+                  <option value="8"></option>
+                  <option value="60"></option>
+               </select>
+            </td>
+         </tr>
+         <tr>
+            <td id="settings_min_views_label" style="vertical-align:middle;"></td>
+            <td>
+               <select id="settings_min_views" style="margin-top:5px; font-size:100%; width:110px;">
+                  <option value="1"></option>
+                  <option value="5"></option>
+                  <option value="10"></option>
+               </select>
+            </td>
+         </tr>
+         <tr>
+            <td id="settings_currency_label" style="vertical-align:middle;">Budget currency</td>
+            <td>
+               <select id="settings_currency" style="margin-top:5px; font-size:100%; width:110px;">
+                  <option>EUR</option>
+                  <option>USD</option>
+               </select>
+            </td>
+         </tr>
+         <tr>
+            <td id="settings_log_level_label" style="vertical-align:middle;"></td>
+            <td>
+               <select id="settings_log_level" style="margin-top:5px; font-size:100%; width:110px;">
+                  <option value="1">Debug</option>
+                  <option value="2">Error</option>
+               </select>
+            </td>
+         </tr>
+         </table>
+      </div>
+      <div class="dialog_footer">
+         <a id="settings_backup" href="#" class="button" style="margin-right:10px;"></a>
+         <a id="settings_recovery" href="#" class="button" style="margin-right:10px;"></a>
+         <a id="settings_done" href="#" class="button" style="background:lightgrey;"></a>
+      </div>
+      <span id="settings_close" class="close">&times;</span>
+   </div>
+</div>
+<div id="backup_dialog" class="modal">
+   <div class="modal-content" style="width:600px; border-radius:10px;">
+      <div id="backup_title" class="dialog_header"></div>
+      <div style="padding:0px 20px 10px 20px;">
+         <p id="backup_desc_1"></p>
+         <p id="backup_desc_2" style="font-weight:bold;"></p>
+         <p id="backup_passphrase_label" style="margin-bottom:0px; padding-bottom:5px; text-decoration:underline;"></p>
+         <textarea id="backup_passphrase" style="margin-top:0px; padding-top:0px; border:0px; font-family:arial; font-size:100%;" cols="65" rows="3" readonly="true"></textarea>
+      </div>
+      <div class="dialog_footer">
+         <a id="backup_passphrase_copy" href="#" class="button" style="margin-right:10px;"></a>
+         <a id="backup_passphrase_save" href="#" class="button" style="margin-right:10px;"></a>
+         <a id="backup_done" href="#" class="button" style="background:lightgrey;"></a>
+      </div>
+      <span id="backup_close" class="close">&times;</span>
+   </div>
+</div>
+<div id="recovery_dialog" class="modal">
+   <div class="modal-content" style="width:600px; border-radius:10px;">
+      <div id="recovery_title" class="dialog_header"></div>
+      <div style="padding:0px 20px 10px 20px;">
+         <p id="recovery_desc_1"></p>
+         <p id="recovery_desc_2"></p>
+         <p id="recovery_passphrase_label" style="margin-bottom:0px; padding-bottom:5px;"></p>
+         <textarea id="recovery_passphrase" style="margin-top:0px; padding-top:0px; font-family:arial;" cols="70" rows="3"></textarea>
+      </div>
+      <div class="dialog_footer">
+         <a id="recovery_recover" href="#" class="button" style="margin-right:10px;"></a>
+         <a id="recovery_done" href="#" class="button" style="background:lightgrey;"></a>
+      </div>
+      <span id="recovery_close" class="close">&times;</span>
+   </div>
+</div>
+<div id="funds_dialog" class="modal">
+   <div class="modal-content" style="width:600px; border-radius:10px;">
+      <div id="funds_title" class="dialog_header"></div>
+      <div style="padding:0px 20px 10px 20px;">
+         <p id="funds_desc_1"></p>
+         <p id="funds_desc_2" style="font-weight:bold;"></p>
+         <table cellpadding="0px" cellspacing="0px" style="margin:0px auto; margin-top:30px; margin-bottom:30px;">
+         <tr>
+            <td style="padding-right:20px;"><a href="#" id="funds_btc" style="position:relative;"><img src="skin/btc.png" class="currency" /></a></td>
+            <td style="padding-right:20px;"><a href="#" id="funds_eth" style="position:relative;"><img src="skin/eth.png" class="currency" /></a></td>
+            <td style="padding-right:20px;"><a href="#" id="funds_bat" style="position:relative;"><img src="skin/bat.png" class="currency" /></a></td>
+            <td><a href="#" id="funds_ltc" style="position:relative;"><img src="skin/ltc.png" class="currency" /></a></td>
+         </tr>
+         <tr>
+            <td style="text-align:center; padding-right:20px;">BTC</td>
+            <td style="text-align:center; padding-right:20px;">ETH</td>
+            <td style="text-align:center; padding-right:20px;">BAT</td>
+            <td style="text-align:center;">LTC</td>
+         </tr>
+         </table>
+         <p id="funds_hint_1" style="font-size:90%;"></p>
+         <p id="funds_hint_2" style="font-size:90%;"></p>
+      </div>
+      <div class="dialog_footer">
+         <a id="funds_done" href="#" class="button" style="background:lightgrey;"></a>
+      </div>
+      <span id="funds_close" class="close">&times;</span>
+   </div>
+</div>
+<div id="funds_currency_dialog" class="modal">
+   <div class="modal-content" style="width:600px; border-radius:10px;">
+      <div id="funds_currency_title" class="dialog_header"></div>
+      <div style="padding:0px 20px 10px 20px;">
+         <p id="funds_currency_desc_1"></p>
+         <div style="text-align:center; margin-bottom:35px;"><input id="currency_address" style="width:400px; font-size:100%;" readonly /><a id="copy_address" href="#" class="button" style="margin-left:15px; padding:5px;">Copy</a></div>
+         <p id="funds_currency_hint_1" style="font-size:90%;"></p>
+         <p id="funds_currency_hint_2" style="font-size:90%;"></p>
+      </div>
+      <div class="dialog_footer">
+         <a id="funds_currency_done" href="#" class="button" style="background:lightgrey;"></a>
+      </div>
+      <span id="funds_currency_close" class="close">&times;</span>
+   </div>
+</div>
+<div id="history_dialog" class="modal">
+   <div class="modal-content" style="width:600px; border-radius:10px;">
+      <div id="history_title" class="dialog_header"></div>
+      <div id="history_not_contributed" style="display:none; margin-top:30px; margin-bottom:50px; margin-left:20px;"></div>
+      <div id="history_contributed" style="padding:0px 20px 10px 20px; display:none;">
+         <table id="history_contributions" cellspacing="0px" cellpadding="5px" style="width:400px; margin:0px auto; margin-top:15px; margin-bottom:15px; border:1px solid lightgrey; border-collapse: collapse;">
+         <tr style="font-weight:bold; background-color:lightgrey; opacity:0.5;">
+            <td id="history_header_date" style="padding-left:10px; text-align:center;"></td><td id="history_header_total" style="text-align:center;"></td><td id="history_header_details" style="text-align:center;"></td>
+         </tr>
+         </table>
+      </div>
+      <div class="dialog_footer">
+         <a id="history_done" href="#" class="button" style="background:lightgrey;"></a>
+      </div>
+      <span id="history_close" class="close">&times;</span>
+   </div>
+</div>
+<div id="history_details_dialog" class="modal">
+   <div class="modal-content" style="width:650px; border-radius:10px;">
+      <div id="history_details_title" class="dialog_header"></div>
+      <div style="padding:0px 20px 10px 20px;">
+         <div style="text-align:center; margin-top:15px; margin-bottom:15px;"><b><span id="history_details_date_label"></span>: </b><span id="history_details_date"></span>, <b><span id="history_details_amount_label"></span>: </b><span id="history_details_amount"></span></div>
+         <table id="history_details_contribution_details" cellspacing="0px" cellpadding="5px" style="width:600px; margin:0px auto; margin-top:15px; margin-bottom:15px; border:1px solid lightgrey; border-collapse: collapse;">
+         <tr style="font-weight:bold; background-color:lightgrey; opacity:0.5;">
+            <td id="history_details_header_rank" style="padding-left:10px; text-align:center; width:30px;"></td><td id="history_details_header_site" style="text-align:center;"></td><td style="text-align:center; width:50px;">%</td><td id="history_details_header_amount" style="text-align:center; width:80px;"></td>
+         </tr>
+         </table>
+      </div>
+      <div class="dialog_footer">
+         <a id="history_details_done" href="#" class="button" style="background:lightgrey;"></a>
+      </div>
+      <span id="history_details_close" class="close">&times;</span>
+   </div>
+</div>
+<div id="message_dialog" class="modal">
+   <div class="modal-content" style="width:650px; border-radius:10px;">
+      <div id="message_title" class="dialog_header"></div>
+      <div id="message" style="text-align:center; padding:20px;"></div>
+      <div class="dialog_footer">
+         <a id="message_done" href="#" class="button" style="background:lightgrey;"></a>
+      </div>
+      <span id="message_close" class="close" style="top:0px;">&times;</span>
+   </div>
+</div>
+</center>
+</body>
+</html>
