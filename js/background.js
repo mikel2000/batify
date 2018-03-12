@@ -496,8 +496,8 @@ var tabHandler =
             {
                id: tab.id,
                url: tab.url,
-               domain: tabHandler.getDomain(tab.url),
-               name: tabHandler.getDomain(tab.url),
+               domain: tabHandler.getDomain(tab.url, true),
+               name: tabHandler.getDomain(tab.url, true),
                elapsed: null
             };
 
@@ -522,8 +522,8 @@ var tabHandler =
          var storeTab = tabHandler.cache[id];
          storeTab.id = id;
          storeTab.url = url;
-         storeTab.domain = tabHandler.getDomain(url);
-         storeTab.name = tabHandler.getDomain(url);
+         storeTab.domain = tabHandler.getDomain(url, true);
+         storeTab.name = tabHandler.getDomain(url, true);
 
          if(resetElapsed == true)
          {
@@ -535,7 +535,7 @@ var tabHandler =
 
       function isNewDomain(id, url)
       {
-         if(tabHandler.getDomain(url) != tabHandler.cache[id].domain ||
+         if(tabHandler.getDomain(url, true) != tabHandler.cache[id].domain ||
             (url.match(/https:\/\/www\.youtube\.com\/watch/) && url != tabHandler.cache[id].url) ||
             (url.match(/https:\/\/www\.twitch\.tv\/videos/) && url != tabHandler.cache[id].url))
          {
@@ -554,7 +554,7 @@ var tabHandler =
          /* domain or channel changed */
          if(isNewDomain(details.tabId, details.url))
          {
-            utils.log("tabHandler.updated: domain/channel changed. old: " + tabHandler.cache[details.tabId].domain + ", new: " + tabHandler.getDomain(details.url), utils.log_level_debug);
+            utils.log("tabHandler.updated: domain/channel changed. old: " + tabHandler.cache[details.tabId].domain + ", new: " + tabHandler.getDomain(details.url, true), utils.log_level_debug);
 
             /* old domain is external domain -> store view */
             if(tabHandler.cache[details.tabId].domain != tabHandler.domain_internal)
@@ -594,18 +594,21 @@ var tabHandler =
          var storeTab = tabHandler.cache[id];
          storeTab.id = id;
          storeTab.url = url;
-         storeTab.domain = tabHandler.getDomain(url);
-         storeTab.name = tabHandler.getDomain(url);
+         storeTab.domain = tabHandler.getDomain(url, true);
+         storeTab.name = tabHandler.getDomain(url, true);
          storeTab.elapsed = null;
 
          tabHandler.cache[id] = storeTab;
       }
 
+      utils.log("tabHandler.historyUpdated: " + JSON.stringify(details) + ", previous domain: " + tabHandler.getDomain(tabHandler.cache[details.tabId].url, false) + ", previous url: " + tabHandler.cache[details.tabId].url, utils.log_level_debug);
+
+      // top-frame, same domains without path, different urls
       if(details.frameId == 0 &&
-         tabHandler.getDomain(details.url) == tabHandler.getDomain(tabHandler.cache[details.tabId].url) &&
+         tabHandler.getDomain(details.url, false) == tabHandler.getDomain(tabHandler.cache[details.tabId].url, false) &&
          details.url != tabHandler.cache[details.tabId].url)
       {
-         utils.log("tabHandler.historyUpdated: " + JSON.stringify(details), utils.log_level_debug);
+         utils.log("tabHandler.historyUpdated: conditions matched (top-frame, same domain, different url) -> send deactivate", utils.log_level_debug);
          var storeTab = tabHandler.cache[details.tabId];
 
          tabHandler.sendMessage(details.tabId, {action: "deactivate"}).then(function(response)
@@ -623,6 +626,10 @@ var tabHandler =
             setTabData(details.tabId, details.url);
             tabs.sendMessage(details.tabId, {action: "activate", id: details.tabId, logLevel: bkg.config.logLevel});
          });
+      }
+      else
+      {
+         utils.log("tabHandler.historyUpdated: conditions not matched (top-frame, same domain, different url) -> nothing to do", utils.log_level_debug);
       }
    },
 
@@ -646,15 +653,16 @@ var tabHandler =
       tabHandler.cache[tab] = null;
    },
 
-   getDomain: function(url)
+   getDomain: function(url, includePath)
    {
       if(url.match(/(http|https):\/\/[^0-9.]+/))
       {
          var a = document.createElement("a");
          a.href = url;
 
-         if(url.match(/https:\/\/www\.youtube\.com\/watch/) ||
-            url.match(/https:\/\/www.twitch\.tv\/videos/))
+         if(includePath == true &&
+            (url.match(/https:\/\/www\.youtube\.com\/watch/) ||
+             url.match(/https:\/\/www.twitch\.tv\/videos/)))
          {
             var domain = a.hostname + a.pathname;
 

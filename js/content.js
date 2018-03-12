@@ -25,6 +25,7 @@ var content =
    conf_idle_check_interval: 1000 * 10,
 
    logLevel: 1,
+   url: null,
    status: null,
    lastAction: null,
    start: null,
@@ -39,17 +40,6 @@ var content =
 
       if(content.isTopFrame())
       {
-         if(window.location.href.match(/youtube.com\/watch/) ||
-            window.location.href.match(/twitch.tv\/videos/))
-         {
-            content.isVideo = true;
-         }
-
-         if(content.isVideo == false)
-         {
-            window.onscroll = content.throttle(content.handleActivity, 1000);
-         }
-
          window.addEventListener("beforeunload", function(){content.handleDeactivate(true);});
       }
       else if(window.location.href.match(/youtube.com\/embed/))
@@ -63,7 +53,7 @@ var content =
 
    handleMessage: function(request, sender, sendResponse)
    {
-      content.log("handleMessage: " + window.location.href + ", topFrame: " + content.isTopFrame() + ", " + JSON.stringify(request), content.log_level_debug);
+      content.log("handleMessage: " + content.url + ", topFrame: " + content.isTopFrame() + ", " + JSON.stringify(request), content.log_level_debug);
 
       if(request.action == "activate")
       {
@@ -71,7 +61,7 @@ var content =
       }
       else if(request.action == "deactivate")
       {
-         if(window.location.href.match(/youtube.com\/embed/))
+         if(content.url.match(/youtube.com\/embed/))
          {
             content.handleEmbedded();
          }
@@ -87,6 +77,7 @@ var content =
    {
       content.log("handleActivate: url: " + window.location.href, content.log_level_debug);
       content.status = content.status_activated;
+      content.url = window.location.href;
 
       if(content.isTopFrame())
       {
@@ -94,16 +85,22 @@ var content =
          content.start = Date.now();
          content.elapsed = 0;
 
-         if(content.isVideo == false)
+         if(content.url.match(/youtube.com\/watch/) ||
+            content.url.match(/twitch.tv\/videos/))
          {
-            window.setTimeout(content.checkIdle, content.conf_idle_check_interval);
+            content.isVideo = true;
+            content.addVideoListeners();
+            window.removeEventListener("scroll", content.throttle(content.handleActivity, 1000));
          }
          else
          {
-            content.addVideoListeners();
+            content.isVideo = false;
+            content.removeVideoListeners();
+            window.addEventListener("scroll", content.throttle(content.handleActivity, 1000));
+            window.setTimeout(content.checkIdle, content.conf_idle_check_interval);
          }
       }
-      else if(window.location.href.match(/youtube.com\/embed/))
+      else if(content.url.match(/youtube.com\/embed/))
       {
          if(content.videoStatus == content.status_video_playing)
          {
@@ -114,7 +111,7 @@ var content =
 
    handleDeactivate: function(sendMessage)
    {
-      content.log("handleDeactivate: sendMessage: " + sendMessage + ", url: " + window.location.href, content.log_level_debug);
+      content.log("handleDeactivate: sendMessage: " + sendMessage + ", isVideo: " + content.isVideo + ", url: " + content.url, content.log_level_debug);
       content.status = content.status_deactivated;
 
       if(content.isVideo == false)
@@ -171,7 +168,7 @@ var content =
    getChannel: function()
    {
       /* video on youtube.com */
-      if(window.location.href.match(/youtube.com\/watch/))
+      if(content.url.match(/youtube.com\/watch/))
       {
          var a = document.querySelector("#owner-name a");
 
@@ -186,7 +183,7 @@ var content =
          }
       }
       /* embedded youtube video */
-      else if(window.location.href.match(/youtube.com\/embed/))
+      else if(content.url.match(/youtube.com\/embed/))
       {
          var scripts = document.getElementsByTagName("script");
 
@@ -215,7 +212,7 @@ var content =
          }
       }
       // video on twitch.tv
-      else if(window.location.href.match(/twitch.tv\/videos/))
+      else if(content.url.match(/twitch.tv\/videos/))
       {
          var a = document.querySelector("a.channel-header__user");
          var name = document.querySelector("a.channel-header__user h5");
@@ -274,7 +271,7 @@ var content =
          var channel = content.getChannel();
 
          var a = document.createElement("a");
-         a.href = window.location.href;
+         a.href = content.url;
          var domain = a.hostname + a.pathname;
 
          runtime.sendMessage({action: "storeView", view: {domain: domain, elapsed: content.elapsed/1000, channel: channel}});
@@ -302,6 +299,18 @@ var content =
       else
       {
          window.setTimeout(content.addVideoListeners, 500);
+      }
+   },
+
+   removeVideoListeners: function()
+   {
+      var video = document.getElementsByTagName("video")[0];
+
+      if(video)
+      {
+         video.removeEventListener("playing", function(){content.handleVideoStatus(content.status_video_playing);});
+         video.removeEventListener("pause", function(){content.handleVideoStatus(content.status_video_paused);});
+         video.removeEventListener("ended", function(){content.handleVideoStatus(content.status_video_ended);});
       }
    },
 
