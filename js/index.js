@@ -1242,17 +1242,17 @@ var handler =
    {
       var agent = navigator.userAgent;
 
-      if(agent.match(/Chrome/))
+      if(agent.match(/OPR/))
+      {
+         var browser = "Opera";
+      }
+      else if(agent.match(/Chrome/))
       {
          var browser = "Chrome";
       }
       else if(agent.match(/Firefox/))
       {
          var browser = "Firefox";
-      }
-      else if(agent.match(/OPR/))
-      {
-         var browser = "Opera";
       }
 
       return browser;
