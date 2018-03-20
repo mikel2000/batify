@@ -32,8 +32,8 @@ var handler =
       document.getElementById("tos").textContent = handler.getMessage("tos");
       document.getElementById("desc_1").textContent = handler.getMessage("desc1");
       document.getElementById("desc_2").textContent = handler.getMessage("desc2");
-      document.getElementById("desc_3").innerHTML = handler.getMessage("desc3", ["<a href='https://community.batify.net' target='_blank'>" + handler.getMessage("feedback") + "</a>"]);
-      document.getElementById("desc_4").innerHTML = handler.getMessage("desc4", ["<a href='https://www.batify.net' target='_blank'>Batify.net</a>"]);
+      document.getElementById("desc_3").innerHTML = DOMPurify.sanitize(handler.getMessage("desc3", ["<a href='https://community.batify.net' target='_blank'>" + handler.getMessage("feedback") + "</a>"]));
+      document.getElementById("desc_4").innerHTML = DOMPurify.sanitize(handler.getMessage("desc4", ["<a href='https://www.batify.net' target='_blank'>Batify.net</a>"]));
 
       document.getElementById("payment_status_on_label").textContent = handler.getMessage("status");
       document.getElementById("autoinclude_label").textContent = handler.getMessage("autoinclude");
@@ -98,12 +98,12 @@ var handler =
       document.getElementById("funds_title").textContent = handler.getMessage("fundsTitle");
       document.getElementById("funds_desc_1").textContent = handler.getMessage("fundsDesc1");
       document.getElementById("funds_desc_2").textContent = handler.getMessage("fundsDesc2");
-      document.getElementById("funds_hint_1").innerHTML = handler.getMessage("fundsHint1", ["<a href='https://www.batify.net' target='_blank'>Batify.net</a>"]);
-      document.getElementById("funds_hint_2").innerHTML = handler.getMessage("fundsUphold", ["<a href='https://uphold.com/' target='_blank'>Uphold</a>", "<a href='https://uphold.com/en/brave' target='_blank'>" + handler.getMessage("fundsLearnMore") + "</a>"]);
+      document.getElementById("funds_hint_1").innerHTML = DOMPurify.sanitize(handler.getMessage("fundsHint1", ["<a href='https://www.batify.net' target='_blank'>Batify.net</a>"]));
+      document.getElementById("funds_hint_2").innerHTML = DOMPurify.sanitize(handler.getMessage("fundsUphold", ["<a href='https://uphold.com/' target='_blank'>Uphold</a>", "<a href='https://uphold.com/en/brave' target='_blank'>" + handler.getMessage("fundsLearnMore") + "</a>"]));
       document.getElementById("funds_done").textContent = handler.getMessage("close");
 
       document.getElementById("funds_currency_title").textContent = handler.getMessage("fundsCurrencyTitle");
-      document.getElementById("funds_currency_hint_2").innerHTML = handler.getMessage("fundsUphold", ["<a href='https://uphold.com/' target='_blank'>Uphold</a>", "<a href='https://uphold.com/en/brave' target='_blank'>" + handler.getMessage("fundsLearnMore") + "</a>"]);
+      document.getElementById("funds_currency_hint_2").innerHTML = DOMPurify.sanitize(handler.getMessage("fundsUphold", ["<a href='https://uphold.com/' target='_blank'>Uphold</a>", "<a href='https://uphold.com/en/brave' target='_blank'>" + handler.getMessage("fundsLearnMore") + "</a>"]));
       document.getElementById("funds_currency_done").textContent = handler.getMessage("close");
 
       document.getElementById("message_title").textContent = handler.getMessage("messageTitle");
@@ -1256,6 +1256,17 @@ var handler =
       }
 
       return browser;
+   },
+
+   escapeHtml: function(text)
+   {
+      if(text)
+      {
+         text = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
+         text = text.replace(/&lt;p&gt;/g, "<p>").replace(/&lt;\/p&gt;/g, "</p>").replace(/&lt;b&gt;/g, "<b>").replace(/&lt;\/b&gt;/g, "</b>").replace(/&lt;br\s*\/&gt;/g, "<br/>");
+      }
+
+      return text;
    },
 
    log: function(message, level)

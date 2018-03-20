@@ -1511,7 +1511,7 @@ var ledger =
             else
             {
                bkg.config.nextContribution = Date.now() + ledger.conf_contribute_frequency * utils.msecs.day;
-               //bkg.config.nextContribution = Date.now() + utils.msecs.minute * 15;
+               //bkg.config.nextContribution = Date.now() + utils.msecs.minute * 5;
                utils.showNotification("notificationBackupWallet");
             }
 
@@ -2146,7 +2146,7 @@ var ledger =
                var data =
                {
                   hostname: site,
-                  share: (share * 100).toFixed(2),
+                  share: parseFloat((share * 100).toFixed(2)),
                   amount: amount.toFixed(2) + " " + currency
                };
 
