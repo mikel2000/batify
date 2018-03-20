@@ -555,9 +555,12 @@ var handler =
 
       function formatDuration(duration)
       {
-         var date = new Date(null);
-         date.setSeconds(duration);
-         return date.toISOString().substr(11, 8);
+         var hours = Math.floor(duration/3600);
+         duration %= 3600;
+         var minutes = Math.floor(duration/60);
+         var seconds = duration % 60;
+         
+         return hours.toString().padStart(2, "0") + ":" + minutes.toString().padStart(2, "0") + ":" + seconds.toString().padStart(2, "0");
       }
 
       function addTextCell(content, adjust)
@@ -1256,17 +1259,6 @@ var handler =
       }
 
       return browser;
-   },
-
-   escapeHtml: function(text)
-   {
-      if(text)
-      {
-         text = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
-         text = text.replace(/&lt;p&gt;/g, "<p>").replace(/&lt;\/p&gt;/g, "</p>").replace(/&lt;b&gt;/g, "<b>").replace(/&lt;\/b&gt;/g, "</b>").replace(/&lt;br\s*\/&gt;/g, "<br/>");
-      }
-
-      return text;
    },
 
    log: function(message, level)
