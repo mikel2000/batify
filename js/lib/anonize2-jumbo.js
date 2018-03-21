@@ -1,4 +1,4 @@
-/* Based on https://github.com/brave/node-anonize2-relic-emscripten, 0.3.3 */
+/* Based on https://github.com/brave/node-anonize2-relic-emscripten */
 /* Licensed under the Mozilla Public License 2.0 */
 /* Please check ../../LICENSE for licensing details */
 
@@ -355,6 +355,29 @@ function setValue(ptr, value, type, noSafe) {
  default:
   abort("invalid type for setValue: " + type);
  }
+}
+function getValue(ptr, type, noSafe) {
+ type = type || "i8";
+ if (type.charAt(type.length - 1) === "*") type = "i32";
+ switch (type) {
+ case "i1":
+  return HEAP8[ptr >> 0];
+ case "i8":
+  return HEAP8[ptr >> 0];
+ case "i16":
+  return HEAP16[ptr >> 1];
+ case "i32":
+  return HEAP32[ptr >> 2];
+ case "i64":
+  return HEAP32[ptr >> 2];
+ case "float":
+  return HEAPF32[ptr >> 2];
+ case "double":
+  return HEAPF64[ptr >> 3];
+ default:
+  abort("invalid type for getValue: " + type);
+ }
+ return null;
 }
 var ALLOC_STATIC = 2;
 var ALLOC_NONE = 4;
@@ -54245,6 +54268,8 @@ var dynCall_viiiii = Module["dynCall_viiiii"] = asm["dynCall_viiiii"];
 var dynCall_viiiiii = Module["dynCall_viiiiii"] = asm["dynCall_viiiiii"];
 Module["asm"] = asm;
 Module["cwrap"] = cwrap;
+Module["setValue"] = setValue;
+Module["getValue"] = getValue;
 if (memoryInitializer) {
  if (!isDataURI(memoryInitializer)) {
   if (typeof Module["locateFile"] === "function") {
