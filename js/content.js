@@ -107,6 +107,8 @@ var content =
             content.start = Date.now();
          }
       }
+
+      runtime.sendMessage({action: "updateExtensionIcon", channel: content.getChannel()});
    },
 
    handleDeactivate: function(sendMessage)

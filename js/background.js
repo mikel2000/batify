@@ -455,10 +455,15 @@ var tabHandler =
          tabHandler.cache[sender.tab.id].elapsed += request.elapsed;
          utils.log("tabHandler.handleMessage: id: " + sender.tab.id + ", setData: total: " + tabHandler.cache[sender.tab.id].elapsed + ", elapsed: " + request.elapsed, utils.log_level_debug);
          tabHandler.cache[sender.tab.id].channel = request.channel;
+         tabHandler.updateExtensionIcon(tabHandler.cache[sender.tab.id]);
       }
       else if(request.action == "storeView")
       {
          tabHandler.storeView(request.view);
+      }
+      else if (request.action == "updateExtensionIcon")
+      {
+         tabHandler.updateExtensionIcon(tabHandler.cache[sender.tab.id].url, request.channel);
       }
    },
 
@@ -805,10 +810,24 @@ var tabHandler =
    },
 
    // Added by: Mitchell Currey, 22 March 2018
-   updateExtensionIcon: function(url) 
+   updateExtensionIcon: function(url, channel) 
    {
         // If verified, change icon to indicate this
-        var domain = tabHandler.getDomain(url, true);
+        var domain = tabHandler.getDomain(url, false);
+        if(channel)
+        {
+            if(domain.match(/youtube/))
+            {
+                var providerName = "youtube";
+            }
+            else if(domain.match(/twitch/))
+            {
+                var providerName = "twitch";
+            }
+
+            domain = providerName + "#channel:" + channel.id;
+        }
+
         if (domain != tabHandler.domain_internal) 
         {
             ledger.checkSite(domain, false).then(function(data)
