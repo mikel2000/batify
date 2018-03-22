@@ -13,6 +13,7 @@ const webNavigation = chrome.webNavigation || browser.webNavigation;
 const notifications = chrome.notifications || browser.notifications;
 const storage = chrome.storage || browser.storage;
 const i18n = chrome.i18n || browser.i18n;
+const browserAction = chrome.browserAction || browser.browserAction;
 
 var bkg =
 {
@@ -511,6 +512,8 @@ var tabHandler =
             tabHandler.active = tab.id;
          }
 
+         tabHandler.updateExtensionIcon(tab.url);
+
          tabs.sendMessage(tab.id, {action: "activate", id: tab.id, logLevel: bkg.config.logLevel});
       });
    },
@@ -576,6 +579,8 @@ var tabHandler =
                utils.log("tabHandler.updated: old domain is internal (" + tabHandler.cache[details.tabId].url + ") -> view not stored", utils.log_level_debug);
                setTabData(details.tabId, details.url, true);
             }
+
+            tabHandler.updateExtensionIcon(details.url);
          }
          /* domain/channel not changed -> don't store view, cumulate elapsed */
          else
@@ -797,7 +802,28 @@ var tabHandler =
             }
          });
       });
-   }
+   },
+
+   // Added by: Mitchell Currey, 22 March 2018
+   updateExtensionIcon: function(url) 
+   {
+        // If verified, change icon to indicate this
+        var domain = tabHandler.getDomain(url, true);
+        if (domain != tabHandler.domain_internal) 
+        {
+            ledger.checkSite(domain, false).then(function(data)
+            {
+                if (data.verified) {
+                    browserAction.setBadgeText({text: '√'});
+                    browserAction.setBadgeBackgroundColor({color: '#72BF44'});
+                    return;
+                }
+            });
+        }
+        
+        // All other cases, reset
+        browserAction.setBadgeText({text: '', tabId: null});
+    }
 }
 
 var db =
