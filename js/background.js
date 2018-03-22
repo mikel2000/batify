@@ -581,8 +581,6 @@ var tabHandler =
                utils.log("tabHandler.updated: old domain is internal (" + tabHandler.cache[details.tabId].url + ") -> view not stored", utils.log_level_debug);
                setTabData(details.tabId, details.url, true);
             }
-
-            tabHandler.updateExtensionIcon(details.url);
          }
          /* domain/channel not changed -> don't store view, cumulate elapsed */
          else
