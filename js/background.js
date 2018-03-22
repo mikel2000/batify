@@ -455,7 +455,6 @@ var tabHandler =
          tabHandler.cache[sender.tab.id].elapsed += request.elapsed;
          utils.log("tabHandler.handleMessage: id: " + sender.tab.id + ", setData: total: " + tabHandler.cache[sender.tab.id].elapsed + ", elapsed: " + request.elapsed, utils.log_level_debug);
          tabHandler.cache[sender.tab.id].channel = request.channel;
-         tabHandler.updateExtensionIcon(tabHandler.cache[sender.tab.id]);
       }
       else if(request.action == "storeView")
       {
@@ -463,7 +462,7 @@ var tabHandler =
       }
       else if (request.action == "updateExtensionIcon")
       {
-         tabHandler.updateExtensionIcon(tabHandler.cache[sender.tab.id].url, request.channel);
+         tabHandler.updateExtensionIcon(sender.tab, request.channel);
       }
    },
 
@@ -516,8 +515,6 @@ var tabHandler =
             tabHandler.cache[tab.id].elapsed = null;
             tabHandler.active = tab.id;
          }
-
-         tabHandler.updateExtensionIcon(tab.url);
 
          tabs.sendMessage(tab.id, {action: "activate", id: tab.id, logLevel: bkg.config.logLevel});
       });
@@ -595,6 +592,8 @@ var tabHandler =
             setTabData(details.tabId, details.url, false);
          }
       }
+
+      tabs.sendMessage(details.tabId, {action: "update", id: details.tabId, logLevel: bkg.config.logLevel});
    },
 
    historyUpdated: function(details)
@@ -810,10 +809,12 @@ var tabHandler =
    },
 
    // Added by: Mitchell Currey, 22 March 2018
-   updateExtensionIcon: function(url, channel) 
+   updateExtensionIcon: function(tab, channel) 
    {
+        if (tab.id != tabHandler.active) return;
+
         // If verified, change icon to indicate this
-        var domain = tabHandler.getDomain(url, false);
+        var domain = tabHandler.getDomain(tab.url, false);
         if(channel)
         {
             if(domain.match(/youtube/))
