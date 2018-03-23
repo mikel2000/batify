@@ -832,7 +832,7 @@ var tabHandler =
             ledger.checkSite(domain, false).then(function(data)
             {
                 if (data.verified) {
-                    browserAction.setBadgeText({text: '√'});
+                    browserAction.setBadgeText({text: '✓'});
                     browserAction.setBadgeBackgroundColor({color: '#72BF44'});
                     return;
                 }
