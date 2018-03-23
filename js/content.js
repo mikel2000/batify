@@ -71,6 +71,10 @@ var content =
             return true;
          }
       }
+      else if(request.action == "update")
+      {
+          content.handleUpdate();
+      }
    },
 
    handleActivate: function()
@@ -107,6 +111,8 @@ var content =
             content.start = Date.now();
          }
       }
+
+      runtime.sendMessage({action: "updateExtensionIcon", channel: content.getChannel()});
    },
 
    handleDeactivate: function(sendMessage)
@@ -136,6 +142,13 @@ var content =
       {
          return {elapsed: content.elapsed/1000, channel: channel};
       }
+   },
+
+   handleUpdate: function() 
+   {
+       content.log("handleUpdate: url: " + window.location.href, content.log_level_debug);
+
+       runtime.sendMessage({action: "updateExtensionIcon", channel: content.getChannel()});
    },
 
    handleActivity: function(e)

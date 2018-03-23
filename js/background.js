@@ -13,6 +13,7 @@ const webNavigation = chrome.webNavigation || browser.webNavigation;
 const notifications = chrome.notifications || browser.notifications;
 const storage = chrome.storage || browser.storage;
 const i18n = chrome.i18n || browser.i18n;
+const browserAction = chrome.browserAction || browser.browserAction;
 
 var bkg =
 {
@@ -459,6 +460,10 @@ var tabHandler =
       {
          tabHandler.storeView(request.view);
       }
+      else if (request.action == "updateExtensionIcon")
+      {
+         tabHandler.updateExtensionIcon(sender.tab, request.channel);
+      }
    },
 
    activated: function(tab)
@@ -585,6 +590,8 @@ var tabHandler =
             setTabData(details.tabId, details.url, false);
          }
       }
+
+      tabs.sendMessage(details.tabId, {action: "update", id: details.tabId, logLevel: bkg.config.logLevel});
    },
 
    historyUpdated: function(details)
@@ -797,7 +804,44 @@ var tabHandler =
             }
          });
       });
-   }
+   },
+
+   // Added by: Mitchell Currey, 22 March 2018
+   updateExtensionIcon: function(tab, channel) 
+   {
+        if (tab.id != tabHandler.active) return;
+
+        // If verified, change icon to indicate this
+        var domain = tabHandler.getDomain(tab.url, false);
+        if(channel)
+        {
+            if(domain.match(/youtube/))
+            {
+                var providerName = "youtube";
+            }
+            else if(domain.match(/twitch/))
+            {
+                var providerName = "twitch";
+            }
+
+            domain = providerName + "#channel:" + channel.id;
+        }
+
+        if (domain != tabHandler.domain_internal) 
+        {
+            ledger.checkSite(domain, false).then(function(data)
+            {
+                if (data.verified) {
+                    browserAction.setBadgeText({text: '✓'});
+                    browserAction.setBadgeBackgroundColor({color: '#72BF44'});
+                    return;
+                }
+            });
+        }
+        
+        // All other cases, reset
+        browserAction.setBadgeText({text: '', tabId: null});
+    }
 }
 
 var db =
