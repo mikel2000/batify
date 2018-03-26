@@ -71,6 +71,11 @@ var content =
             return true;
          }
       }
+      else if(request.action == "getChannel")
+      {
+         window.setTimeout(function(){sendResponse(content.getChannel());}, 5000);
+         return true;
+      }
    },
 
    handleActivate: function()
@@ -281,8 +286,26 @@ var content =
 
    addVideoListeners: function()
    {
-      var video = document.getElementsByTagName("video")[0];
-      content.log("addVideoListeners: " + video, content.log_level_debug);
+      if(window.location.href.match(/twitch/))
+      {
+         var videoSearch = document.querySelector("div.player-video video");
+
+         if(videoSearch)
+         {
+            content.log("addVideoListeners: title: " + videoSearch.title, content.log_level_debug);
+      
+            if(videoSearch.title == "")
+            {
+               var video = videoSearch;
+            }
+         }
+      }
+      else
+      {
+         var video = document.getElementsByTagName("video")[0];
+      }
+
+      content.log("addVideoListeners: video: " + video, content.log_level_debug);
 
       if(video)
       {
@@ -290,9 +313,10 @@ var content =
          video.addEventListener("pause", function(){content.handleVideoStatus(content.status_video_paused);});
          video.addEventListener("ended", function(){content.handleVideoStatus(content.status_video_ended);});
 
-         // if video was already playing when listeners were registered
+         // if video was already playing when listeners were registered -> set status playing
          if(video.paused == false)
          {
+            content.log("addVideoListeners: not paused -> set status playing", content.log_level_debug);
             content.handleVideoStatus(content.status_video_playing);
          }
       }

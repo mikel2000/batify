@@ -13,6 +13,7 @@ const webNavigation = chrome.webNavigation || browser.webNavigation;
 const notifications = chrome.notifications || browser.notifications;
 const storage = chrome.storage || browser.storage;
 const i18n = chrome.i18n || browser.i18n;
+const browserAction = chrome.browserAction || browser.browserAction;
 
 var bkg =
 {
@@ -438,6 +439,7 @@ var tabHandler =
    {
       utils.log("tabHandler.init: start initializing...", utils.log_level_debug);
       tabs.onActivated.addListener(tabHandler.activated);
+      webNavigation.onBeforeNavigate.addListener(tabHandler.resetVerified);
       webNavigation.onCompleted.addListener(tabHandler.updated);
       webNavigation.onHistoryStateUpdated.addListener(tabHandler.historyUpdated);
       tabs.onRemoved.addListener(tabHandler.removed);
@@ -471,6 +473,7 @@ var tabHandler =
          if(tabHandler.active)
          {
             utils.log("tabHandler.activated: tab " + tabHandler.active + " is deactivated", utils.log_level_debug);
+            tabHandler.resetVerified();
             var tabDeactive = tabHandler.cache[tabHandler.active];
 
             tabHandler.sendMessage(tabDeactive.id, {action: "deactivate"}).then(function(response)
@@ -512,6 +515,7 @@ var tabHandler =
          }
 
          tabs.sendMessage(tab.id, {action: "activate", id: tab.id, logLevel: bkg.config.logLevel});
+         tabHandler.displayVerified(tab.id);
       });
    },
 
@@ -565,9 +569,11 @@ var tabHandler =
                tabHandler.storeView(storeTab, true).then(function()
                {
                   setTabData(details.tabId, details.url, true);
+                  tabHandler.displayVerified(details.tabId);
                }).catch(function(e)
                {
                   setTabData(details.tabId, details.url, true);
+                  tabHandler.displayVerified(details.tabId);
                });
             }
             /* old domain is internal domain -> don't store view */
@@ -575,6 +581,7 @@ var tabHandler =
             {
                utils.log("tabHandler.updated: old domain is internal (" + tabHandler.cache[details.tabId].url + ") -> view not stored", utils.log_level_debug);
                setTabData(details.tabId, details.url, true);
+               tabHandler.displayVerified(details.tabId);
             }
          }
          /* domain/channel not changed -> don't store view, cumulate elapsed */
@@ -583,6 +590,7 @@ var tabHandler =
             utils.log("tabHandler.updated: domain/channel not changed -> view not stored, elapsed cumulated", utils.log_level_debug);
             // don't reset elapsed -> pass "false"
             setTabData(details.tabId, details.url, false);
+            tabHandler.displayVerified(details.tabId);
          }
       }
    },
@@ -609,6 +617,8 @@ var tabHandler =
          details.url != tabHandler.cache[details.tabId].url)
       {
          utils.log("tabHandler.historyUpdated: conditions matched (top-frame, same domain, different url) -> send deactivate", utils.log_level_debug);
+         utils.log("reset: historyUpdated", utils.log_level_debug);
+         tabHandler.resetVerified();
          var storeTab = tabHandler.cache[details.tabId];
 
          tabHandler.sendMessage(details.tabId, {action: "deactivate"}).then(function(response)
@@ -621,10 +631,12 @@ var tabHandler =
          {
             setTabData(details.tabId, details.url);
             tabs.sendMessage(details.tabId, {action: "activate", id: details.tabId, logLevel: bkg.config.logLevel});
+            tabHandler.displayVerified(details.tabId);
          }).catch(function(e)
          {
             setTabData(details.tabId, details.url);
             tabs.sendMessage(details.tabId, {action: "activate", id: details.tabId, logLevel: bkg.config.logLevel});
+            tabHandler.displayVerified(details.tabId);
          });
       }
       else
@@ -651,6 +663,7 @@ var tabHandler =
 
       tabHandler.active = null;
       tabHandler.cache[tab] = null;
+      tabHandler.resetVerified();
    },
 
    getDomain: function(url, includePath)
@@ -711,19 +724,9 @@ var tabHandler =
          {
             if(storeView.channel)
             {
-               if(storeView.domain.match(/youtube/))
-               {
-                  var providerName = "youtube";
-                  var providerDesc = "YouTube";
-               }
-               else if(storeView.domain.match(/twitch/))
-               {
-                  var providerName = "twitch";
-                  var providerDesc = "Twitch";
-               }
-
-               storeView.domain = providerName + "#channel:" + storeView.channel.id;
-               var name = storeView.channel.name + " on " + providerDesc;
+               var site = tabHandler.getSiteData(storeView.domain, storeView.channel);
+               storeView.domain = site.domain;
+               storeView.name = site.name;
             }
             else
             {
@@ -741,14 +744,9 @@ var tabHandler =
             storeView.included = site.included;
             storeView.verified = site.verified;
 
-            if(!name)
+            if(!storeView.name)
             {
                storeView.name = site.domain;
-            }
-            // channel
-            else
-            {
-               storeView.name = name;
             }
 
             return db.storeView(storeView);
@@ -778,6 +776,126 @@ var tabHandler =
             }
          });
       });
+   },
+
+   displayVerified: function(tabId)
+   {
+      function getChannel(domain)
+      {
+         return new Promise(function(resolve, reject)
+         {
+            if(domain.match(/www\.youtube\.com\/(watch|embed)/) ||
+               domain.match(/www\.twitch\.tv\/videos/))
+            {
+               tabHandler.sendMessage(tabHandler.active, {action: "getChannel"}).then(function(channel)
+               {
+                  if(channel)
+                  {
+                     resolve(channel);
+                  }
+                  else
+                  {
+                     utils.log("tabHandler.displayVerified: no channel got although one exists -> exit", utils.log_level_debug);
+                     reject();
+                  }
+               }).catch(function(e)
+               {
+                  utils.log("tabHandler.displayVerified: getting channel failed: " + e, utils.log_level_debug);
+                  reject();
+               });
+            }
+            else
+            {
+               resolve(null);
+            }
+         });
+      }
+
+      var domain = tabHandler.getDomain(tabHandler.cache[tabHandler.active].url, true);
+
+      getChannel(domain).then(function(channel)
+      {
+         utils.log("tabHandler.displayVerified: domain: " + domain + ", channel: " + JSON.stringify(channel), utils.log_level_debug);
+
+         if(domain != tabHandler.domain_internal)
+         {
+            var site = tabHandler.getSiteData(domain, channel);
+
+            ledger.checkSite(site.domain, false).then(function(data)
+            {
+               site.domain = data.domain;
+               site.included = data.included;
+               site.verified = data.verified;
+
+               if(!site.name)
+               {
+                  site.name = data.domain;
+               }
+
+               return db.addSite(site);
+            }).then(function(data)
+            {
+               if(tabId == tabHandler.active)
+               {
+                  if(data.verified)
+                  {
+                     browserAction.setBadgeText({text: "✓"});
+                     browserAction.setBadgeBackgroundColor({color: "#72BF44"});
+                  }
+                  else
+                  {
+                     tabHandler.resetVerified();
+                  }
+               }
+            }).catch(function(e)
+            {
+               tabHandler.resetVerified();
+            });
+         }
+         else
+         {
+            tabHandler.resetVerified();
+         }
+      }).catch(function(e)
+      {
+         tabHandler.resetVerified();
+      });
+   },
+
+   resetVerified: function(details)
+   {
+      if(!details || (details && details.frameId == 0))
+      {
+         browserAction.setBadgeText({text: ""});
+      }
+   },
+
+   getSiteData: function(domain, channel)
+   {
+      var site = {};
+
+      if(channel)
+      {
+         if(domain.match(/youtube/))
+         {
+            var providerName = "youtube";
+            var providerDesc = "YouTube";
+         }
+         else if(domain.match(/twitch/))
+         {
+            var providerName = "twitch";
+            var providerDesc = "Twitch";
+         }
+
+         site.domain = providerName + "#channel:" + channel.id;
+         site.name = channel.name + " on " + providerDesc;
+      }
+      else
+      {
+         site.domain = domain;
+      }
+
+      return site;
    },
 
    sendMessage: function(id, message)
@@ -832,62 +950,20 @@ var db =
 
    storeView: function(view)
    {
-      function getSiteId(view)
-      {
-         return new Promise(function(resolve, reject)
-         {
-            storageDb.select("site", {hostname: view.domain}).then(function(result)
-            {
-               if(result.length == 0)
-               {
-                  utils.log("db.storeView: site " + view.domain + " not found -> add it", utils.log_level_debug);
-
-                  storageDb.insert
-                  (
-                     "site",
-                     {
-                        hostname: view.domain,
-                        name: view.name,
-                        included: view.included,
-                        verified: view.verified,
-                        pinned: false,
-                        pinnedShare: 0,
-                        status: ledger.site_status_active
-                     }
-                  ).then(function(result)
-                  {
-                     utils.log("db.storeView: site " + view.domain + " added. site id: " + result.id, utils.log_level_debug);
-                     resolve(result.id);
-                  }).catch(function(e)
-                  {
-                     utils.log("db.storeView: ERROR: site couldn't be stored: " + JSON.stringify(view) + ", message: " + JSON.stringify(e), utils.log_level_error);
-                     reject();
-                  });
-               }
-               else
-               {
-                  utils.log("db.storeView: site found in db. site id: " + result[0].id, utils.log_level_debug);
-                  resolve(result[0].id);
-               }
-            }).catch(function(e)
-            {
-               utils.log("db.storeView: ERROR: site couldn't be selected: " + JSON.stringify(view) + ", message: " + e, utils.log_level_error);
-            });
-         });
-      }
-
       return new Promise(function(resolve, reject)
       {
          if(bkg.config.paymentStatus == true)
          {
             utils.log("db.storeView: begin storing: " + JSON.stringify(view), utils.log_level_debug, utils.log_level_debug);
 
-            getSiteId(view).then(function(siteId)
+            db.addSite(view).then(function(site)
             {
+               utils.log("db.storeView: site: " + JSON.stringify(site), utils.log_level_debug);
+
                return storageDb.insert
                (
                   "view",
-                  {id_site: siteId, duration: view.elapsed, timestamp: Date.now()}
+                  {id_site: site.id, duration: view.elapsed, timestamp: Date.now()}
                );
             }).then(function()
             {
@@ -904,6 +980,49 @@ var db =
          {
             return Promise.resolve();
          }
+      });
+   },
+
+   addSite: function(site)
+   {
+      return new Promise(function(resolve, reject)
+      {
+         db.getSites({hostname: site.domain}).then(function(sites)
+         {
+            if(sites.length == 0)
+            {
+               storageDb.insert
+               (
+                  "site",
+                  {
+                     hostname: site.domain,
+                     name: site.name,
+                     included: site.included,
+                     verified: site.verified,
+                     pinned: false,
+                     pinnedShare: 0,
+                     status: ledger.site_status_active
+                  }
+               ).then(function(result)
+               {
+                  utils.log("db.addSite: new site added: " + JSON.stringify(result), utils.log_level_debug);
+                  resolve(result);
+               }).catch(function(e)
+               {
+                  utils.log("db.addSite: ERROR: addSite failed: site: " + JSON.stringify(site) + ", error: " + e, utils.log_level_error);
+                  reject();
+               });
+            }
+            else
+            {
+               utils.log("db.addSite: site already exists -> not added: " + JSON.stringify(sites[0]), utils.log_level_debug);
+               resolve(sites[0]);
+            }
+         }).catch(function(e)
+         {
+            utils.log("db.addSite: ERROR: addSite failed: site: " + JSON.stringify(site) + ", error: " + e, utils.log_level_error);
+            reject();
+         });
       });
    },
 
@@ -942,13 +1061,28 @@ var db =
    {
       return new Promise(function(resolve, reject)
       {
-         storageDb.insert("domain", domain).then(function(domain)
+         db.getDomain(domain.name).then(function(result)
          {
-            utils.log("db.addDomain: new domain added: " + JSON.stringify(domain), utils.log_level_debug);
-            resolve();
+            if(!result)
+            {
+               storageDb.insert("domain", domain).then(function(result)
+               {
+                  utils.log("db.addDomain: new domain added: " + JSON.stringify(result), utils.log_level_debug);
+                  resolve(result);
+               }).catch(function(e)
+               {
+                  utils.log("db.addDomain: ERROR: addDomain failed: domain: " + JSON.stringify(domain) + ", error: " + e, utils.log_level_error);
+                  reject();
+               });
+            }
+            else
+            {
+               utils.log("db.addDomain: domain already exists -> not added: " + JSON.stringify(result), utils.log_level_debug);
+               resolve(result);
+            }
          }).catch(function(e)
          {
-            utils.log("db.addDomain: ERROR: addDomain failed: " + e, utils.log_level_error);
+            utils.log("db.addDomain: ERROR: addDomain failed: domain: " + JSON.stringify(domain) + ", error: " + e, utils.log_level_error);
             reject();
          });
       });
@@ -1726,11 +1860,18 @@ var ledger =
                   {
                      db.getSites({hostname: domain.publisher}).then(function(sites)
                      {
-                        var result = {};
-                        result.domain = domain.publisher;
-                        result.included = sites[0].included;
-                        result.verified = sites[0].verified;
-                        resolve(result);
+                        if(sites.length > 0)
+                        {
+                           var result = {};
+                           result.domain = domain.publisher;
+                           result.included = sites[0].included;
+                           result.verified = sites[0].verified;
+                           resolve(result);
+                        }
+                        else
+                        {
+                           resolve(null);
+                        }
                      }).catch(function(e)
                      {
                         resolve(null);
@@ -1786,21 +1927,14 @@ var ledger =
                      result.verified = true;
                   }
 
-                  if(forceServerCheck == false)
-                  {
-                     db.addDomain({name: site, publisher: response.publisher}).then(function()
-                     {
-                        resolve(result);
-                     }).catch(function(e)
-                     {
-                        utils.log("ledger.checkSite: ERROR: check site failed: " + JSON.stringify(site) + ", error: " + e, utils.log_level_error);
-                        reject();
-                     });
-                  }
-                  else
+                  db.addDomain({name: site, publisher: response.publisher}).then(function()
                   {
                      resolve(result);
-                  }
+                  }).catch(function(e)
+                  {
+                     utils.log("ledger.checkSite: ERROR: check site failed: " + JSON.stringify(site) + ", error: " + e, utils.log_level_error);
+                     reject();
+                  });
                }).catch(function(e)
                {
                   utils.log("ledger.checkSite: ERROR: check site failed: " + JSON.stringify(site) + ", error: " + e, utils.log_level_error);
