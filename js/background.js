@@ -499,8 +499,8 @@ var tabHandler =
             {
                id: tab.id,
                url: tab.url,
-               domain: tabHandler.getDomain(tab.url, true),
-               name: tabHandler.getDomain(tab.url, true),
+               domain: tabHandler.getDomain(tab.url),
+               name: tabHandler.getDomain(tab.url),
                elapsed: null
             };
 
@@ -526,8 +526,8 @@ var tabHandler =
          var storeTab = tabHandler.cache[id];
          storeTab.id = id;
          storeTab.url = url;
-         storeTab.domain = tabHandler.getDomain(url, true);
-         storeTab.name = tabHandler.getDomain(url, true);
+         storeTab.domain = tabHandler.getDomain(url);
+         storeTab.name = tabHandler.getDomain(url);
 
          if(resetElapsed == true)
          {
@@ -537,28 +537,15 @@ var tabHandler =
          tabHandler.cache[id] = storeTab;
       }
 
-      function isNewDomain(id, url)
-      {
-         if(tabHandler.getDomain(url, true) != tabHandler.cache[id].domain ||
-            (url.match(/https:\/\/www\.youtube\.com\/watch/) && url != tabHandler.cache[id].url) ||
-            (url.match(/https:\/\/www\.twitch\.tv\/videos/) && url != tabHandler.cache[id].url))
-         {
-            return true;
-         }
-         else
-         {
-            return false;
-         }
-      }
-
       if(details.frameId == 0)
       {
          utils.log("tabHandler.updated: " + details.tabId + ", details: " + JSON.stringify(details) + ", old: " + tabHandler.cache[details.tabId].url + ", new: " + details.url, utils.log_level_debug);
 
          /* domain or channel changed */
-         if(isNewDomain(details.tabId, details.url))
+         if(tabHandler.getDomain(details.url) != tabHandler.cache[details.tabId].domain ||
+            (tabHandler.isChannel(details.url) && details.url != tabHandler.cache[details.tabId].url))
          {
-            utils.log("tabHandler.updated: domain/channel changed. old: " + tabHandler.cache[details.tabId].domain + ", new: " + tabHandler.getDomain(details.url, true), utils.log_level_debug);
+            utils.log("tabHandler.updated: domain/channel changed. old: " + tabHandler.cache[details.tabId].domain + ", new: " + tabHandler.getDomain(details.url), utils.log_level_debug);
 
             /* old domain is external domain -> store view */
             if(tabHandler.cache[details.tabId].domain != tabHandler.domain_internal)
@@ -602,22 +589,21 @@ var tabHandler =
          var storeTab = tabHandler.cache[id];
          storeTab.id = id;
          storeTab.url = url;
-         storeTab.domain = tabHandler.getDomain(url, true);
-         storeTab.name = tabHandler.getDomain(url, true);
+         storeTab.domain = tabHandler.getDomain(url);
+         storeTab.name = tabHandler.getDomain(url);
          storeTab.elapsed = null;
 
          tabHandler.cache[id] = storeTab;
       }
 
-      utils.log("tabHandler.historyUpdated: " + JSON.stringify(details) + ", previous domain: " + tabHandler.getDomain(tabHandler.cache[details.tabId].url, false) + ", previous url: " + tabHandler.cache[details.tabId].url, utils.log_level_debug);
+      utils.log("tabHandler.historyUpdated: " + JSON.stringify(details) + ", previous domain: " + tabHandler.getDomain(tabHandler.cache[details.tabId].url) + ", previous url: " + tabHandler.cache[details.tabId].url, utils.log_level_debug);
 
       // top-frame, same domains without path, different urls
       if(details.frameId == 0 &&
-         tabHandler.getDomain(details.url, false) == tabHandler.getDomain(tabHandler.cache[details.tabId].url, false) &&
+         tabHandler.getDomain(details.url) == tabHandler.getDomain(tabHandler.cache[details.tabId].url) &&
          details.url != tabHandler.cache[details.tabId].url)
       {
          utils.log("tabHandler.historyUpdated: conditions matched (top-frame, same domain, different url) -> send deactivate", utils.log_level_debug);
-         utils.log("reset: historyUpdated", utils.log_level_debug);
          tabHandler.resetVerified();
          var storeTab = tabHandler.cache[details.tabId];
 
@@ -666,30 +652,14 @@ var tabHandler =
       tabHandler.resetVerified();
    },
 
-   getDomain: function(url, includePath)
+   getDomain: function(url)
    {
       if(url.match(/(http|https):\/\/[^0-9.]+/))
       {
          var a = document.createElement("a");
          a.href = url;
 
-         if(includePath == true &&
-            (url.match(/https:\/\/www\.youtube\.com\/watch/) ||
-             url.match(/https:\/\/www.twitch\.tv\/videos/)))
-         {
-            var domain = a.hostname + a.pathname;
-
-            if(a.query)
-            {
-               domain = domain + a.query;
-            }
-
-            return domain;
-         }
-         else
-         {
-            return a.hostname;
-         }
+         return a.hostname;
       }
       else
       {
@@ -719,8 +689,7 @@ var tabHandler =
             return;
          }
 
-         if(storeView.domain.match(/www\.youtube\.com\/(watch|embed)/) ||
-            storeView.domain.match(/www\.twitch\.tv\/videos/))
+         if(tabHandler.isChannel(storeView.url))
          {
             if(storeView.channel)
             {
@@ -780,12 +749,11 @@ var tabHandler =
 
    displayVerified: function(tabId)
    {
-      function getChannel(domain)
+      function getChannel(url)
       {
          return new Promise(function(resolve, reject)
          {
-            if(domain.match(/www\.youtube\.com\/(watch|embed)/) ||
-               domain.match(/www\.twitch\.tv\/videos/))
+            if(tabHandler.isChannel(url))
             {
                tabHandler.sendMessage(tabHandler.active, {action: "getChannel"}).then(function(channel)
                {
@@ -811,11 +779,12 @@ var tabHandler =
          });
       }
 
-      var domain = tabHandler.getDomain(tabHandler.cache[tabHandler.active].url, true);
+      var domain = tabHandler.getDomain(tabHandler.cache[tabHandler.active].url);
+      utils.log("tabHandler.displayVerified: domain: " + domain, utils.log_level_debug);
 
-      getChannel(domain).then(function(channel)
+      getChannel(tabHandler.cache[tabHandler.active].url).then(function(channel)
       {
-         utils.log("tabHandler.displayVerified: domain: " + domain + ", channel: " + JSON.stringify(channel), utils.log_level_debug);
+         utils.log("tabHandler.displayVerified: channel: " + JSON.stringify(channel), utils.log_level_debug);
 
          if(domain != tabHandler.domain_internal)
          {
@@ -896,6 +865,23 @@ var tabHandler =
       }
 
       return site;
+   },
+
+   isChannel: function(url)
+   {
+      if(url.match(/https:\/\/www\.youtube\.com\/(watch|embed)/) ||
+         url.match(/https:\/\/www\.twitch\.tv\/$/) ||
+         url.match(/https:\/\/www\.twitch\.tv\/videos\/[0-9]+$/) ||
+         url.match(/https:\/\/www\.twitch\.tv\/[a-z0-9]+$/i))
+      {
+         utils.log("tabHandler.isChannel: true: url: " + url, utils.log_level_debug);
+         return true;
+      }
+      else
+      {
+         utils.log("tabHandler.isChannel: false: url: " + url, utils.log_level_debug);
+         return false;
+      }
    },
 
    sendMessage: function(id, message)

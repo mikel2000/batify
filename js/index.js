@@ -37,6 +37,7 @@ var handler =
 
       document.getElementById("payment_status_on_label").textContent = handler.getMessage("status");
       document.getElementById("autoinclude_label").textContent = handler.getMessage("autoinclude");
+      document.getElementById("twitter").title = handler.getMessage("twitter");
       document.getElementById("help").title = handler.getMessage("help");
       document.getElementById("history").title = handler.getMessage("history");
       document.getElementById("settings").title = handler.getMessage("settings");
@@ -559,7 +560,7 @@ var handler =
          duration %= 3600;
          var minutes = Math.floor(duration/60);
          var seconds = duration % 60;
-         
+
          return hours.toString().padStart(2, "0") + ":" + minutes.toString().padStart(2, "0") + ":" + seconds.toString().padStart(2, "0");
       }
 
