@@ -32,6 +32,12 @@
   "lastContribution": {"message": "Last contribution"},
   "lastContributionNever": {"message": "Never"},
   "nextContribution": {"message": "Next contribution"},
+  "days": {"message": "days"},
+  "day": {"message": "day"},
+  "hours": {"message": "hours"},
+  "hour": {"message": "hour"},
+  "minutes": {"message": "minutes"},
+  "minute": {"message": "minute"},
   "walletSettingUp": {"message": "Setting up wallet..."},
   "walletReady": {"message": "Your wallet is ready!"},
   "walletNotCreated": {"message": "No wallet created"},
@@ -154,5 +160,9 @@
   "notificationContributionSucceeded": {"message": "Contribution was successfully executed. Thanks!"},
   "notificationFundsNotSufficient": {"message": "Your funds are not sufficient to execute the contribution. Please add some funds."},
   "notificationFundsWillNotSufficient": {"message": "Your funds won't be sufficient to execute the next contribution. Please add some funds."},
-  "notificationContributionAdvance": {"message": "The next contribution will take place in about 2 days. Perhaps you like to check included and pinned websites before."}
+  "notificationContributionAdvance": 
+  {
+     "message": "The next contribution will take place in about $PERIOD$. Perhaps you like to check your budget and included and pinned websites before.",
+     "placeholders": {"period": {"content" : "$1"}}
+  }
 }

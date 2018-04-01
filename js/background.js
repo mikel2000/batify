@@ -1331,25 +1331,6 @@ var db =
       });
    },
 
-   clearViews: function(frequency)
-   {
-      var frequency = frequency * utils.msecs.day;
-      var compare = Date.now() - frequency;
-
-      return new Promise(function(resolve, reject)
-      {
-         storageDb.delete("view", {timestamp: {"<": compare}}).then(function(rows)
-         {
-            utils.log("db.clearViews: " + rows + " rows deleted", utils.log_level_debug);
-            resolve();
-         }).catch(function(e)
-         {
-            utils.log("db.clearViews: ERROR: clearViews failed: " + e, utils.log_level_error);
-            reject();
-         });
-      });
-   },
-
    deleteViews: function(where)
    {
       return new Promise(function(resolve, reject)
@@ -2511,7 +2492,9 @@ var ledger =
             }
          }).then(function()
          {
-            return db.clearViews(ledger.conf_contribute_frequency);
+            var frequency = ledger.conf_contribute_frequency * utils.msecs.day;
+            var compare = Date.now() - frequency;
+            return db.deleteViews({timestamp: {"<=": compare}});
          }).then(function()
          {
             utils.log("ledger.captureViews: views successfully captured -> next", utils.log_level_debug);
@@ -2890,6 +2873,45 @@ var contributor =
       setTimeout(contributor.doit, 1000);
    },
 
+   getAdvancePeriod: function()
+   {
+      var diff = bkg.config.nextContribution - Date.now();
+      var days = Math.round(diff/utils.msecs.day);
+      
+      if(days > 1)
+      {
+         var period = days + " " + utils.getMessage("days");
+      }
+      else if(days <= 1)
+      {
+         var hours = Math.round(diff/utils.msecs.hour);   
+         
+         if(hours > 24)
+         {
+            var period = days + " " + utils.getMessage("day");
+         }
+         else if(hours > 1)
+         {
+            var period = hours + " " + utils.getMessage("hours");
+         }
+         else
+         {
+            var minutes = Math.round(diff/utils.msecs.minute);   
+            
+            if(minutes > 1)
+            {
+               var period = minutes + " " + utils.getMessage("minutes");
+            }
+            else
+            {
+               var period = minutes + " " + utils.getMessage("minute");
+            }
+         }
+      }
+      
+      return period;
+   },
+
    resumeContributions: function()
    {
       return new Promise(function(resolve, reject)
@@ -2975,7 +2997,7 @@ var contributor =
                   setTimeout(contributor.doit, contributor.interval);
                });
             }
-            // 2 days before next contribution date -> check if balance will be sufficent
+            // max. 2 days before next contribution date -> check if balance will be sufficent
             else if((Date.now() + utils.msecs.day * 2) >= bkg.config.nextContribution)
             {
                if(contributor.balanceAdvanceChecked == false)
@@ -3003,7 +3025,7 @@ var contributor =
                      else
                      {
                         utils.log("contributor.doit: balance will be sufficent for next contribution", utils.log_level_debug);
-                        utils.showNotification("notificationContributionAdvance");
+                        utils.showNotification("notificationContributionAdvance", [contributor.getAdvancePeriod()]);
                         setTimeout(contributor.doit, contributor.interval);
                      }
                   }).catch(function(e)
@@ -3019,7 +3041,7 @@ var contributor =
                // already checked -> nothing to do
                else
                {
-                  utils.log("contributor.doit: already 2 days in advance checked -> nothing to do", utils.log_level_debug);
+                  utils.log("contributor.doit: already max. 2 days in advance checked -> nothing to do", utils.log_level_debug);
                   setTimeout(contributor.doit, contributor.interval);
                }
             }
