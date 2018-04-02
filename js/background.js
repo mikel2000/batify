@@ -1499,9 +1499,9 @@ var db =
    {
       return new Promise(function(resolve, reject)
       {
-         db.getContributions({status: {">=": ledger.contrib_status_voted}}).then(function(contributions)
+         db.getContributions({status: {">=": ledger.contrib_status_payed}}).then(function(contributions)
          {
-            resolve(contributions[0]);
+            resolve(contributions[contributions.length - 1]);
          }).catch(function(e)
          {
             utils.log("db.getLastContribution: ERROR: last contribution couldn't be selected: " + e, utils.log_level_error);
@@ -2422,7 +2422,7 @@ var ledger =
             {
                utils.log("ledger.pay: payment successfully finished -> next", utils.log_level_debug);
                utils.showNotification("notificationContributionSucceeded");
-               setTimeout(function(){bkg.sendMessage("refreshContributed");}, utils.msecs.second * 30);
+               setTimeout(function(){bkg.sendMessage("refreshContributed");}, utils.msecs.second * 10);
                resolve(contribution.id);
             }).catch(function(e)
             {
@@ -2877,15 +2877,15 @@ var contributor =
    {
       var diff = bkg.config.nextContribution - Date.now();
       var days = Math.round(diff/utils.msecs.day);
-      
+
       if(days > 1)
       {
          var period = days + " " + utils.getMessage("days");
       }
       else if(days <= 1)
       {
-         var hours = Math.round(diff/utils.msecs.hour);   
-         
+         var hours = Math.round(diff/utils.msecs.hour);
+
          if(hours > 24)
          {
             var period = days + " " + utils.getMessage("day");
@@ -2896,8 +2896,8 @@ var contributor =
          }
          else
          {
-            var minutes = Math.round(diff/utils.msecs.minute);   
-            
+            var minutes = Math.round(diff/utils.msecs.minute);
+
             if(minutes > 1)
             {
                var period = minutes + " " + utils.getMessage("minutes");
@@ -2908,7 +2908,7 @@ var contributor =
             }
          }
       }
-      
+
       return period;
    },
 
@@ -3697,7 +3697,7 @@ var utils =
          iconUrl: extension.getURL("skin/batify_48.png")
       }
 
-      if(utils.isChrome())
+      if(utils.isChromium())
       {
          options.requireInteraction = true;
       }
@@ -3711,7 +3711,7 @@ var utils =
       return message;
    },
 
-   isChrome: function()
+   isChromium: function()
    {
       var browser = navigator.userAgent;
 

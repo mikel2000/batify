@@ -1250,6 +1250,14 @@ var handler =
       {
          var browser = "Opera";
       }
+      else if(agent.match(/Vivaldi/))
+      {
+         var browser = "Vivaldi";
+      }
+      else if(agent.match(/YaBrowser/))
+      {
+         var browser = "Yandex";
+      }
       else if(agent.match(/Chrome/))
       {
          var browser = "Chrome";
@@ -1257,6 +1265,10 @@ var handler =
       else if(agent.match(/Firefox/))
       {
          var browser = "Firefox";
+      }
+      else
+      {
+         var browser = "browser";
       }
 
       return browser;
