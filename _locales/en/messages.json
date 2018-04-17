@@ -11,11 +11,6 @@
   "desc2": {"message": "BATify is not affiliated with or sponsored by Brave Software in any way. Brave has made their software open-source, thus allowing for the creation of BATify. The contributions you make will still flow through Brave's anonymized ledger system."},
   "desc3":
   {
-     "message": "Batify is currently in Beta. Your $FEEDBACK$ is much appreciated and helps optimizing it further.",
-     "placeholders": {"feedback": {"content" : "$1"}}
-  },
-  "desc4":
-  {
      "message": "Need more info? Please visit $BATIFYNET$.",
      "placeholders": {"batifynet": {"content" : "$1"}}
   },
@@ -26,7 +21,7 @@
   "help": {"message": "Help"},
   "history": {"message": "Contribution History"},
   "settings": {"message": "Advanced Settings"},
-  "budget": {"message": "Biweekly budget"},
+  "budget": {"message": "Monthly budget"},
   "balance": {"message": "Account balance"},
   "addFunds": {"message": "Add funds"},
   "lastContribution": {"message": "Last contribution"},
@@ -160,7 +155,7 @@
   "notificationContributionSucceeded": {"message": "Contribution was successfully executed. Thanks!"},
   "notificationFundsNotSufficient": {"message": "Your funds are not sufficient to execute the contribution. Please add some funds."},
   "notificationFundsWillNotSufficient": {"message": "Your funds won't be sufficient to execute the next contribution. Please add some funds."},
-  "notificationContributionAdvance": 
+  "notificationContributionAdvance":
   {
      "message": "The next contribution will take place in about $PERIOD$. Perhaps you like to check your budget and included and pinned websites before.",
      "placeholders": {"period": {"content" : "$1"}}

@@ -1501,7 +1501,7 @@ var db =
       {
          db.getContributions({status: {">=": ledger.contrib_status_payed}}).then(function(contributions)
          {
-            resolve(contributions[contributions.length - 1]);
+            resolve(contributions[0]);
          }).catch(function(e)
          {
             utils.log("db.getLastContribution: ERROR: last contribution couldn't be selected: " + e, utils.log_level_error);
@@ -1512,7 +1512,7 @@ var db =
 
    setLogLevel: function(level)
    {
-      storageDb.setLogLevel(utils.log_level_error);
+      //storageDb.setLogLevel(level);
    }
 }
 
@@ -1543,8 +1543,9 @@ var ledger =
    },
 
    conf_env: "production",
-   conf_contribute_frequency: 14, // days
-   conf_vote_commit_delay_max: 60 * 10, // seconds
+   conf_contribute_frequency: 30, // days
+   conf_vote_commit_delay_min: 10, // seconds
+   conf_vote_commit_delay_max: 60 * 4, // seconds
    conf_contributor_interval: 1000 * 60 * 10,
    conf_voting_committer_interval: 1000 * 60,
    conf_site_updater_interval: 1000 * 60 * 60 * 12,
@@ -1552,7 +1553,7 @@ var ledger =
    conf_max_contribution_errors: 10,
    conf_exchange_rate_max_age: 1000 * 60 * 10,
 
-   default_budget: 2,
+   default_budget: 4,
    default_min_view_duration: 8,
    default_min_views: 1,
    default_budget_currency: "USD",
@@ -2163,7 +2164,8 @@ var ledger =
                {
                   id: contributions[i].id,
                   date: contributions[i].data.payment.paymentStamp,
-                  amount: contributions[i].data.payment.probi/1000000000000000000 + " " + contributions[i].data.payment.altcurrency
+                  amount: contributions[i].data.payment.probi/1000000000000000000,
+                  currency: contributions[i].data.payment.altcurrency
                };
 
                contributionsOut.push(contribution);
@@ -2247,8 +2249,9 @@ var ledger =
                var data =
                {
                   hostname: site,
-                  share: parseFloat((share * 100).toFixed(2)),
-                  amount: amount.toFixed(2) + " " + currency
+                  share: share * 100,
+                  amount: amount,
+                  currency: currency
                };
 
                sitesData.push(data);
@@ -2262,7 +2265,8 @@ var ledger =
             var data =
             {
                date: contribution.data.payment.paymentStamp,
-               amount: contribution.data.payment.probi/1000000000000000000 + " " + contribution.data.payment.altcurrency,
+               amount: contribution.data.payment.probi/1000000000000000000,
+               currency: contribution.data.payment.altcurrency,
                sites: sitesOut
             }
 
@@ -2519,6 +2523,7 @@ var ledger =
    {
       var prepared = [];
       var viewingId = null;
+      var surveyorIds = null;
 
       function prepare(surveyorId)
       {
@@ -2573,7 +2578,7 @@ var ledger =
                {
                   if(surveyorIds[i] == surveyorId)
                   {
-                     var delayed = Date.now() + utils.getRandom(utils.msecs.second, ledger.conf_vote_commit_delay_max * utils.msecs.second);
+                     var delayed = Date.now() + utils.getRandom(ledger.conf_vote_commit_delay_min * utils.msecs.second, ledger.conf_vote_commit_delay_max * utils.msecs.second);
 
                      var data =
                      {

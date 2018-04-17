@@ -32,8 +32,7 @@ var handler =
       document.getElementById("tos").textContent = handler.getMessage("tos");
       document.getElementById("desc_1").textContent = handler.getMessage("desc1");
       document.getElementById("desc_2").textContent = handler.getMessage("desc2");
-      document.getElementById("desc_3").innerHTML = DOMPurify.sanitize(handler.getMessage("desc3", ["<a href='https://community.batify.net' target='_blank'>" + handler.getMessage("feedback") + "</a>"]));
-      document.getElementById("desc_4").innerHTML = DOMPurify.sanitize(handler.getMessage("desc4", ["<a href='https://www.batify.net' target='_blank'>Batify.net</a>"]));
+      document.getElementById("desc_3").innerHTML = DOMPurify.sanitize(handler.getMessage("desc3", ["<a href='https://www.batify.net' target='_blank'>Batify.net</a>"]));
 
       document.getElementById("payment_status_on_label").textContent = handler.getMessage("status");
       document.getElementById("autoinclude_label").textContent = handler.getMessage("autoinclude");
@@ -202,7 +201,7 @@ var handler =
          document.getElementById("hide_excluded").checked = config.showIncludedOnly;
          document.getElementById("hide_deleted").checked = config.showActiveOnly;
          document.getElementById("budget").value = config.budget;
-         document.getElementById("contribution_next").textContent = nextContribution.toLocaleDateString();
+         document.getElementById("contribution_next").textContent = nextContribution.toLocaleDateString(i18n.LanguageCode, {year: "numeric", month: "2-digit", day: "2-digit"});
          document.getElementById("settings_min_view_duration").value = config.minViewDuration;
          document.getElementById("settings_min_views").value = config.minViews;
          document.getElementById("settings_currency").value = config.budgetCurrency;
@@ -256,7 +255,7 @@ var handler =
             handler.showWalletStatus(result.walletStatus);
 
             var nextContribution = new Date(result.nextContribution);
-            document.getElementById("contribution_next").textContent = nextContribution.toLocaleDateString();
+            document.getElementById("contribution_next").textContent = nextContribution.toLocaleDateString(i18n.LanguageCode, {year: "numeric", month: "2-digit", day: "2-digit"});
 
             runtime.sendMessage({action: "getConfig"}, handler.handleConfig);
             runtime.sendMessage({action: "getWalletStatus"}, handler.showWalletStatus);
@@ -520,7 +519,7 @@ var handler =
       if(data.success == true)
       {
          var lastContribution = new Date(data.timestamp);
-         var display = lastContribution.toLocaleDateString();
+         var display = lastContribution.toLocaleDateString(i18n.LanguageCode, {year: "numeric", month: "2-digit", day: "2-digit"});
       }
       else
       {
@@ -1111,8 +1110,8 @@ var handler =
                }
 
                var date = new Date(contribution.date);
-               addTextCell(row, date.toLocaleDateString(), "left");
-               addTextCell(row, contribution.amount, "right");
+               addTextCell(row, date.toLocaleDateString(i18n.LanguageCode, {year: "numeric", month: "2-digit", day: "2-digit"}), "left");
+               addTextCell(row, contribution.amount.toFixed(2) + " " + contribution.currency, "right");
                addDetailsCell(row, contribution.id);
                table.appendChild(row);
             }
@@ -1192,8 +1191,8 @@ var handler =
       if(response.success == true)
       {
          var date = new Date(response.date);
-         document.getElementById("history_details_date").textContent = date.toLocaleDateString() + " " + date.toLocaleTimeString();
-         document.getElementById("history_details_amount").textContent = response.amount;
+         document.getElementById("history_details_date").textContent = date.toLocaleDateString(i18n.LanguageCode, {year: "numeric", month: "2-digit", day: "2-digit"}) + " " + date.toLocaleTimeString(i18n.LanguageCode, {hour: "2-digit", minute: "2-digit", second: "2-digit"});
+         document.getElementById("history_details_amount").textContent = response.amount.toFixed(2) + " " + response.currency;
 
          var table = document.getElementById("history_details_contribution_details");
          var rows = table.getElementsByTagName("tr");
@@ -1219,8 +1218,8 @@ var handler =
 
             addTextCell(row, i + 1, "right");
             addSiteCell(row, site);
-            addTextCell(row, site.share, "right");
-            addTextCell(row, site.amount, "right");
+            addTextCell(row, site.share.toFixed(2), "right");
+            addTextCell(row, site.amount.toFixed(2) + " " + site.currency, "right");
             table.appendChild(row);
          }
       }
