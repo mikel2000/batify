@@ -31,7 +31,7 @@ var bkg =
          minViewDuration: ledger.default_min_view_duration,
          minViews: ledger.default_min_views,
          budgetCurrency: ledger.default_budget_currency,
-         logLevel: utils.log_level_debug
+         logLevel: utils.log_level_error
       }}).then(function(config)
       {
          bkg.config = config.config;
@@ -912,7 +912,7 @@ var db =
 
       return new Promise(function(resolve, reject)
       {
-         storageDb.init("batify", utils.log_level_error).then(function()
+         storageDb.init("batify", bkg.config.logLevel).then(function()
          {
             var tables = [];
             tables.push({name: "site", fields: ["hostname", "name", "included", "verified", "pinned", "pinnedShare", "status"]});
@@ -1512,7 +1512,7 @@ var db =
 
    setLogLevel: function(level)
    {
-      //storageDb.setLogLevel(level);
+      storageDb.setLogLevel(level);
    }
 }
 
@@ -3083,6 +3083,18 @@ var votingCommitter =
       var credential = null;
       var submitted = [];
 
+      function cleanup(contribution)
+      {
+         delete contribution.data.views;
+         delete contribution.data.credential;
+
+         for(var i = 0; i < contribution.data.surveyorIds.length; i++)
+         {
+            delete contribution.data.surveyorIds[i].prepared;
+            delete contribution.data.surveyorIds[i].delayed;
+         }
+      }
+
       function workOnSurveyorId(surveyorId)
       {
          return new Promise(function(resolve, reject)
@@ -3154,6 +3166,7 @@ var votingCommitter =
 
                if(allSubmitted == true)
                {
+                  cleanup(contribution);
                   contribution.status = ledger.contrib_status_voting_committed;
                }
 

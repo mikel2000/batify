@@ -7,7 +7,7 @@
              "32": "skin/batify_32.png",
              "48": "skin/batify_48.png",
              "128": "skin/batify_128.png" },
-  "version": "1.0.0",
+  "version": "1.0.1",
   "default_locale": "en",
   "homepage_url": "https://www.batify.net/",
   "author": "Michael Volz",
