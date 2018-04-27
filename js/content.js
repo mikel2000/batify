@@ -130,11 +130,13 @@ var content =
    handleDeactivate: function(sendMessage)
    {
       content.log("handleDeactivate: sendMessage: " + sendMessage + ", isVideo: " + content.isVideo + ", url: " + content.url, content.log_level_debug);
-      content.status = content.status_deactivated;
 
       if(content.isVideo == false)
       {
-         content.elapsed = Date.now() - content.start;
+         if(content.status == content.status_activated)
+         {
+            content.elapsed += Date.now() - content.start;
+         }
       }
       else
       {
@@ -144,6 +146,7 @@ var content =
          }
       }
 
+      content.status = content.status_deactivated;
       var channel = content.getChannel();
 
       if(sendMessage == true)

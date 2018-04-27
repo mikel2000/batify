@@ -9,6 +9,7 @@
 const runtime = chrome.runtime || browser.runtime;
 const extension = chrome.extension || browser.extension;
 const tabs = chrome.tabs || browser.tabs;
+const windows = chrome.windows || browser.windows;
 const webNavigation = chrome.webNavigation || browser.webNavigation;
 const notifications = chrome.notifications || browser.notifications;
 const storage = chrome.storage || browser.storage;
@@ -434,10 +435,13 @@ var tabHandler =
 
    cache: [],
    active: null,
+   windowId: null,
 
    init: function()
    {
       utils.log("tabHandler.init: start initializing...", utils.log_level_debug);
+      windows.onFocusChanged.addListener(tabHandler.windowChanged);
+      windows.onRemoved.addListener(tabHandler.windowRemoved);
       tabs.onActivated.addListener(tabHandler.activated);
       webNavigation.onBeforeNavigate.addListener(tabHandler.resetVerified);
       webNavigation.onCompleted.addListener(tabHandler.updated);
@@ -463,9 +467,34 @@ var tabHandler =
       }
    },
 
+   windowChanged: function(windowId)
+   {
+      tabs.query({active: true, currentWindow: true}, function(response)
+      {
+         if(tabHandler.active && response[0] && tabHandler.active != response[0].id &&
+            (!tabHandler.windowId || tabHandler.windowId != response[0].windowId))
+         {
+            utils.log("tabHandler.windowChanged: window changed -> call activated", utils.log_level_debug);
+            tabHandler.windowId = response[0].windowId;
+            tabHandler.activated({tabId: response[0].id});
+         }
+      });
+   },
+
+   windowRemoved: function(windowId)
+   {
+      utils.log("tabHandler.windowRemoved", utils.log_level_debug);
+
+      tabs.query({active: true}, function(response)
+      {
+         tabHandler.windowId = response[0].windowId;
+         tabHandler.activated({tabId: response[0].id});
+      });
+   },
+
    activated: function(tab)
    {
-      utils.log("tabHandler.activated: " + tab.tabId, utils.log_level_debug);
+      utils.log("tabHandler.activated: id: " + tab.tabId + ", active: " + tabHandler.active, utils.log_level_debug);
 
       tabs.get(tab.tabId, function(tab)
       {
@@ -498,6 +527,7 @@ var tabHandler =
             tabHandler.cache[tab.id] =
             {
                id: tab.id,
+               incognito: tab.incognito,
                url: tab.url,
                domain: tabHandler.getDomain(tab.url),
                name: tabHandler.getDomain(tab.url),
@@ -673,6 +703,13 @@ var tabHandler =
       {
          utils.log("tabHandler.storeView: begin storing: " + JSON.stringify(view), utils.log_level_debug);
 
+         if(view.incognito == true)
+         {
+            utils.log("tabHandler.storeView: incognito mode active -> don't store", utils.log_level_debug);
+            resolve();
+            return;
+         }
+
          // clone view to avoid changes in the original object
          var storeView = JSON.parse(JSON.stringify(view));
 
@@ -781,6 +818,12 @@ var tabHandler =
 
       var domain = tabHandler.getDomain(tabHandler.cache[tabHandler.active].url);
       utils.log("tabHandler.displayVerified: domain: " + domain, utils.log_level_debug);
+
+      if(tabHandler.cache[tabHandler.active].incognito == true)
+      {
+         utils.log("tabHandler.displayVerified: incognito active -> exit", utils.log_level_debug);
+         return;
+      }
 
       getChannel(tabHandler.cache[tabHandler.active].url).then(function(channel)
       {

@@ -1,6 +1,7 @@
 {
   "extensionDescription": {"message": "Support the sites you like"},
 
+  "incognito": {"message": "BATify is disabled in incognito/private mode."},
   "status": {"message": "Status"},
   "teaser1":
   {

@@ -8,20 +8,32 @@
 
 var tabs = chrome.tabs || browser.tabs;
 var extension = chrome.extension || browser.extension;
+var i18n = chrome.i18n || browser.i18n;
 
 function init()
 {
-   tabs.query({url: extension.getURL("index.html")}, function(response)
+   tabs.query({active: true, currentWindow: true}, function(response)
    {
-      if(response.length == 0)
+      if(response[0].incognito == true)
       {
-         tabs.create({url: extension.getURL("index.html"), "active": true});
-         window.close();
+         var message = i18n.getMessage("incognito");
+         document.getElementById("incognito").textContent = message;
       }
       else
       {
-         tabs.update(response[0].id, {active: true});
-         window.close();
+         tabs.query({url: extension.getURL("index.html")}, function(response)
+         {
+            if(response.length == 0)
+            {
+               tabs.create({url: extension.getURL("index.html"), "active": true});
+               window.close();
+            }
+            else
+            {
+               tabs.update(response[0].id, {active: true});
+               window.close();
+            }
+         });
       }
    });
 }
