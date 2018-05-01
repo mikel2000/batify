@@ -17,6 +17,7 @@
   },
   "feedback": {"message": "feedback"},
   "tos": {"message": "Terms of Service"},
+  "serverError": {"message": "Server error"},
   "autoinclude": {"message": "Autoinclude"},
   "twitter": {"message": "Follow BATify on Twitter"},
   "help": {"message": "Help"},

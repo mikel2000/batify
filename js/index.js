@@ -494,7 +494,7 @@ var handler =
       }
       else
       {
-         var display = "-";
+         var display = handler.getMessage("ServerError");
       }
 
       document.getElementById("wallet_balance").value = display;
