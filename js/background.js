@@ -2147,16 +2147,32 @@ var ledger =
             utils.httpGet("https://api.coinmarketcap.com/v1/ticker/basic-attention-token/").then(function(data)
             {
                batUsd = parseFloat(data[0].price_usd);
-               return utils.httpGet("https://api.fixer.io/latest?base=USD&symbols=" + currency);
+               return utils.httpGet("https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml", false);
             }).then(function(data)
             {
-               if(data.rates[currency])
+               if(currency == "USD")
                {
-                  var rate = data.rates[currency];
+                  var rate = 1;
                }
                else
                {
-                  var rate = 1;
+                  var parser = new DOMParser();
+                  var doc = parser.parseFromString(data, "text/xml");
+                  var cubes = doc.getElementsByTagName("Cube");
+                  var rates = [];
+                  rates["EUR"] = 1;
+               
+                  for(var i = 0; i < cubes.length; i++)
+                  {
+                     if(cubes[i].getAttribute("currency"))
+                     {
+                        rates[cubes[i].getAttribute("currency")] = cubes[i].getAttribute("rate");
+                     }
+                  }
+
+                  var factor = 1/rates["USD"];
+                  var rate = 1/factor/rates[currency];
+                  rate = 1/rate;
                }
 
                var exchangeRate = batUsd * rate;
@@ -3556,7 +3572,7 @@ var utils =
       return p;
    },
 
-   httpGet: function(url)
+   httpGet: function(url, json = true)
    {
       return new Promise(function(resolve, reject)
       {
@@ -3569,7 +3585,14 @@ var utils =
             {
                if(xmlHttp.status == 200)
                {
-                  resolve(JSON.parse(xmlHttp.responseText));
+                  if(json == true)
+                  {
+                     resolve(JSON.parse(xmlHttp.responseText));
+                  }
+                  else
+                  {
+                     resolve(xmlHttp.responseText);
+                  }
                }
                else
                {
